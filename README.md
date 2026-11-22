@@ -44,7 +44,7 @@ Porte fiel de `integrar_valoriza()` do pipeline Python: salário por vaga, jorna
 
 ## Atualizar os dados do CAGED
 
-Na máquina do Bruno, pasta `D:\CREASP\Gabinete\Python\Extracao de dados\Borsato\Kleber`:
+Na máquina do Bruno, na pasta dos scripts do Kleber (fora deste repositório, porque usa credenciais e consultas internas):
 
 1. Rode `AtualizarPainelCaged.bat`.
 2. Responda se quer buscar no MTE os meses novos do CAGED.
