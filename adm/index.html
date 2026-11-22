@@ -63,7 +63,7 @@ a{color:var(--azul)}
 .login-msg{min-height:20px;color:var(--verm);font-weight:500}
 
 /* ---------- topo ---------- */
-.app{min-height:100dvh;display:grid;grid-template-rows:auto 1fr}
+.app{min-height:100dvh;display:grid;grid-template-rows:auto 1fr auto}
 .topo{position:sticky;top:0;z-index:20;background:var(--sup);border-bottom:1px solid var(--ln)}
 .topo-in{max-width:1400px;margin:0 auto;padding:10px 16px 0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px 18px}
 .marca{display:flex;align-items:center;gap:14px;min-width:0}
@@ -138,13 +138,18 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
 @keyframes brilho{from{background:var(--ouro-bg)}to{background:transparent}}
 .tab tr.mudou td{animation:brilho 2.2s ease}
 
-/* ---------- gaveta do editor ---------- */
-.veu{position:fixed;inset:0;z-index:40;background:rgba(10,25,45,.42);opacity:0;transition:opacity .2s}
-.veu.ab{opacity:1}
-.gaveta{position:fixed;z-index:41;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--bg);display:grid;grid-template-rows:auto 1fr auto;
-  box-shadow:-12px 0 40px rgba(0,20,45,.2);transform:translateX(100%);transition:transform .25s var(--ease)}
-.gaveta.ab{transform:none}
+/* ---------- janela central do editor (modal) ---------- */
+.janela-bg{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:rgba(10,25,45,.48);opacity:0;transition:opacity .2s;overscroll-behavior:contain}
+.janela-bg.ab{opacity:1}
+.janela-ed{width:min(860px,100%);max-height:calc(100dvh - 32px);background:var(--bg);border-radius:14px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  box-shadow:0 24px 60px rgba(0,20,45,.35);overflow:hidden;transform:translateY(10px) scale(.985);transition:transform .22s var(--ease)}
+.janela-bg.ab .janela-ed{transform:none}
+html.com-janela{overflow:hidden}
 .gav-cab{background:var(--sup);border-bottom:1px solid var(--ln);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+.gav-cab>div:first-child{min-width:0}
+.gav-cab h3{overflow-wrap:anywhere}
+.gav-cab .acoes-cab{display:flex;gap:6px;flex:none}
 .gav-cab h3{margin:0;font-size:17px;line-height:1.25}
 .gav-cab small{color:var(--tx2)}
 .gav-corpo{overflow:auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start}
@@ -152,6 +157,9 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
 .grade{align-items:start}
 .gav-pe{background:var(--sup);border-top:1px solid var(--ln);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .gav-pe .esp{flex:1}
+.gav-msg{font-size:13px;font-weight:600;color:var(--tx2);min-width:0}
+.gav-msg.erro{color:var(--verm)}
+.gav-cab h3{word-break:break-word;overflow-wrap:break-word}
 .bloco{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:14px;display:grid;gap:12px}
 .bloco>h4{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);display:flex;align-items:center;gap:8px}
 .bloco>h4::before{content:"";width:14px;height:2px;background:var(--ouro);display:block}
@@ -173,6 +181,51 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
 .apont li{padding:8px 10px;border-radius:var(--r-sm);background:var(--amb-bg);border:1px solid #f0d9a6;color:#5e3d00;font-size:13px}
 .apont li b{display:block;color:#6e4700}
 .extras{display:grid;gap:4px;font-size:13px}
+
+/* ---------- lista com busca (município e estado) ---------- */
+.combo{display:flex;align-items:stretch;border:1px solid var(--ln2);border-radius:var(--r-sm);background:var(--sup);min-width:0}
+.combo:focus-within{border-color:var(--azul);box-shadow:0 0 0 3px rgba(0,80,155,.15)}
+.campo.erro .combo{border-color:var(--verm);box-shadow:0 0 0 3px rgba(179,38,30,.12)}
+.campo .combo input,.campo.erro .combo input,.campo .combo input:focus{flex:1 1 auto;min-width:0;border:0;box-shadow:none;background:transparent}
+.combo-seta{flex:none;width:38px;border:0;border-left:1px solid var(--ln);background:var(--sup-2);border-radius:0 var(--r-sm) var(--r-sm) 0;display:grid;place-items:center;color:var(--tx2)}
+.combo-seta::before{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+.combo.aberto .combo-seta::before{transform:translateY(2px) rotate(-135deg)}
+.combo-lista{margin-top:4px;border:1px solid var(--azul);border-radius:var(--r-sm);background:var(--sup);max-height:264px;overflow:auto;box-shadow:0 0 0 3px rgba(0,80,155,.12)}
+.combo-info{position:sticky;top:0;z-index:1;padding:7px 11px;font-size:12px;color:var(--tx2);background:var(--sup-2);border-bottom:1px solid var(--ln)}
+.combo-op{padding:9px 11px;cursor:pointer;display:flex;gap:8px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--ln)}
+.combo-op:last-child{border-bottom:0}
+.combo-op .uf{font-size:12px;font-weight:700;color:var(--azul);flex:none}
+.combo-op mark{background:var(--ouro-bg);color:inherit;border-radius:3px;box-shadow:inset 0 -2px 0 var(--ouro-2)}
+.combo-op.ativo{background:#e7f0f8}
+.combo-op[aria-selected="true"]{font-weight:700}
+.combo-op[aria-selected="true"]::after{content:"escolhido";font-size:11px;color:var(--verde);font-weight:700;flex:none}
+.combo-vazio{padding:10px 11px;color:var(--tx2);font-size:13px}
+.campo .nota-campo{font-size:12px;color:#6e4700;background:var(--amb-bg);border:1px solid #f0d9a6;border-radius:6px;padding:6px 8px}
+
+/* ---------- botão Início e ajuda (?) ---------- */
+.bt-inicio{transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease)}
+html.rolou .bt-inicio{background:var(--azul-deep);border-color:var(--azul-deep);color:#fff;box-shadow:0 4px 14px -4px rgba(0,57,110,.7)}
+.ic-casa{width:13px;height:12px;position:relative;display:inline-block;flex:none}
+.ic-casa::before{content:"";position:absolute;left:1px;right:1px;bottom:0;height:7px;border:2px solid currentColor;border-top:0}
+.ic-casa::after{content:"";position:absolute;left:2.5px;top:1px;width:8px;height:8px;border-left:2px solid currentColor;border-top:2px solid currentColor;transform:rotate(45deg)}
+.aj{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #cfe0ef;background:#e7f0f8;color:var(--azul-deep);font-weight:800;font-size:13px;line-height:1;display:inline-grid;place-items:center;padding:0;cursor:pointer;transition:background .2s,color .2s}
+.aj:hover{background:var(--azul-deep);color:#fff;border-color:var(--azul-deep)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.kpi-top .aj{width:22px;height:22px;font-size:12px}
+.cab-tit{display:flex;align-items:center;gap:10px}
+.bloco>h4 .aj{margin-left:auto;width:22px;height:22px;font-size:12px}
+.ajuda-bg{z-index:65}
+.ajuda-cx{width:min(640px,100%);max-height:calc(100dvh - 32px);background:var(--sup);border-radius:14px;display:grid;grid-template-rows:auto minmax(0,1fr);box-shadow:0 24px 60px rgba(0,20,45,.35);overflow:hidden}
+.ajuda-cab{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ln)}
+.ajuda-cab h3{margin:0;font-size:17px;min-width:0;overflow-wrap:anywhere}
+.ajuda-corpo{overflow:auto;padding:14px 16px 18px;display:grid;gap:10px;align-content:start;overflow-wrap:anywhere}
+.ajuda-corpo p{margin:0}
+.ajuda-corpo h4{margin:6px 0 0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--azul-deep)}
+.ajuda-corpo ul,.ajuda-corpo ol{margin:0;padding-left:20px;display:grid;gap:5px}
+.ajuda-corpo .ex{padding:10px 12px;border-radius:var(--r-sm);background:var(--ouro-bg);border:1px solid #ecdca0;color:#5c4a00}
+.ajuda-corpo code{font:12.5px var(--mono);background:var(--sup-2);border:1px solid var(--ln);border-radius:4px;padding:0 4px}
+.rodape{max-width:1400px;margin:0 auto;padding:4px 16px 24px;color:var(--tx3);font-size:12px;text-align:center}
+.login-autor{margin:0;text-align:center;color:var(--tx3);font-size:12px}
 
 /* ---------- importação ---------- */
 .solta{display:grid;place-items:center;text-align:center;gap:10px;padding:40px 16px;border:2px dashed var(--ln2);border-radius:14px;background:var(--sup);
@@ -285,6 +338,8 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
   .chk{flex:1 1 100%}
   .dif-campo{grid-template-columns:1fr}
   .gav-pe .bt{flex:1 1 auto}
+  .gav-msg{flex:1 1 100%;order:-1}
+  .gav-msg:empty{display:none}
   .acoes-imp{margin:0 -12px;padding-left:12px;padding-right:12px}
   .acoes-imp .bt{flex:1 1 auto}
   .acoes-imp .esp{display:none}
@@ -297,6 +352,11 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
   .vagas td[data-l]::before{content:attr(data-l) ": ";color:var(--tx3);font-size:12px;font-weight:600}
   .leitura dl{grid-template-columns:1fr;gap:2px}
   .leitura dl dd{margin-bottom:6px}
+}
+@media (max-width:440px){
+  .topo-in{grid-template-columns:1fr}
+  .topo-dir{justify-self:stretch;justify-content:flex-end}
+  .marca img{height:22px}
 }
 @media (max-width:380px){
   .kpis,.resumo{grid-template-columns:1fr 1fr;gap:8px}
@@ -320,6 +380,7 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
     <label class="campo"><span>Senha</span><input name="senha" type="password" autocomplete="current-password" required></label>
     <div class="login-msg" id="loginMsg" role="alert"></div>
     <button class="bt pri" type="submit" id="btEntrar">Entrar</button>
+    <p class="login-autor">Desenvolvido por Alexandre Borsato e Bruno Lima</p>
   </form>
 </section>
 
@@ -332,6 +393,7 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
         <div class="marca-tx"><span>Confea Valoriza</span><b>Administração da base</b></div>
       </div>
       <div class="topo-dir">
+        <button class="bt bt-inicio" id="btInicio" type="button" title="Voltar à lista de processos, no alto da página"><span class="ic-casa" aria-hidden="true"></span>Início</button>
         <a class="bt leve bt-painel" href="../" target="_blank" rel="noopener">Ver painel</a>
         <div class="usuario"><i id="iniciais">F</i><span id="nomeUsuario"></span></div>
         <button class="bt" id="btSair" type="button">Sair</button>
@@ -348,11 +410,13 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
   <main>
     <!-- ---------- PROCESSOS ---------- -->
     <section class="vista" id="v-processos" aria-label="Processos">
+      <div class="cab"><div><div class="cab-tit"><h2>Processos</h2><button class="aj" type="button" data-ajuda="processos" aria-label="Ajuda: como usar esta tela" title="Ajuda: como usar esta tela">?</button></div>
+        <p>Lista dos processos do Confea Valoriza gravados na base. O painel público lê esta base.</p></div></div>
       <div class="kpis">
-        <div class="kpi"><span>Processos</span><b id="kProc">0</b><small>na base</small></div>
-        <div class="kpi ouro"><span>Vagas</span><b id="kVagas">0</b><small>um salário é uma vaga</small></div>
-        <div class="kpi alerta"><span>Abaixo do piso</span><b id="kAbaixo">0</b><small id="kAbaixoPct">das vagas com piso</small></div>
-        <div class="kpi"><span>Apontamentos</span><b id="kAvisos">0</b><small>itens para conferir</small></div>
+        <div class="kpi"><div class="kpi-top"><span>Processos</span><button class="aj" type="button" data-ajuda="kProc" aria-label="Ajuda: Processos">?</button></div><b id="kProc">0</b><small>na base</small></div>
+        <div class="kpi ouro"><div class="kpi-top"><span>Vagas</span><button class="aj" type="button" data-ajuda="kVagas" aria-label="Ajuda: Vagas">?</button></div><b id="kVagas">0</b><small>um salário é uma vaga</small></div>
+        <div class="kpi alerta"><div class="kpi-top"><span>Abaixo do piso</span><button class="aj" type="button" data-ajuda="kAbaixo" aria-label="Ajuda: Abaixo do piso">?</button></div><b id="kAbaixo">0</b><small id="kAbaixoPct">das vagas com piso</small></div>
+        <div class="kpi"><div class="kpi-top"><span>Apontamentos</span><button class="aj" type="button" data-ajuda="kAvisos" aria-label="Ajuda: Apontamentos">?</button></div><b id="kAvisos">0</b><small>itens para conferir</small></div>
       </div>
       <div class="barra">
         <label class="busca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -384,7 +448,7 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
 
     <!-- ---------- IMPORTAR ---------- -->
     <section class="vista" id="v-importar" aria-label="Importar planilha" hidden>
-      <div class="cab"><div><h2>Importar planilha</h2>
+      <div class="cab"><div><div class="cab-tit"><h2>Importar planilha</h2><button class="aj" type="button" data-ajuda="importar" aria-label="Ajuda: como importar a planilha" title="Ajuda: como importar a planilha">?</button></div>
         <p>Envie a planilha do Confea Valoriza como ela está. O sistema compara cada linha com a base pela coluna Nº, mostra o que é novo e o que mudou, e só grava depois da sua confirmação.</p></div></div>
       <div id="impInicio" class="vista">
         <label class="solta" id="solta" tabindex="0">
@@ -408,7 +472,7 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
 
     <!-- ---------- HISTÓRICO ---------- -->
     <section class="vista" id="v-historico" aria-label="Histórico" hidden>
-      <div class="cab"><div><h2>Histórico</h2>
+      <div class="cab"><div><div class="cab-tit"><h2>Histórico</h2><button class="aj" type="button" data-ajuda="historico" aria-label="Ajuda: como usar o histórico" title="Ajuda: como usar o histórico">?</button></div>
         <p>Cada gravação forma um lote: importação, inclusão, alteração ou remoção. Use "Desfazer" para voltar a base ao estado anterior ao lote.</p></div>
         <select id="fHist" aria-label="Mostrar">
           <option value="lotes">Alterações na base</option>
@@ -419,30 +483,38 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
       <button class="bt" id="maisLotes" type="button" hidden>Mostrar mais</button>
     </section>
   </main>
+  <footer class="rodape">Desenvolvido por Alexandre Borsato e Bruno Lima</footer>
 </div>
 
 <!-- ======================= EDITOR ======================= -->
-<div class="veu" id="veu" hidden></div>
-<aside class="gaveta" id="gaveta" hidden aria-modal="true" role="dialog" aria-labelledby="gavTitulo">
+<div class="janela-bg" id="gaveta" hidden>
+<div class="janela-ed" role="dialog" aria-modal="true" aria-labelledby="gavTitulo">
   <div class="gav-cab">
     <div><h3 id="gavTitulo">Processo</h3><small id="gavSub"></small></div>
-    <button class="bt leve" id="gavFechar" type="button" aria-label="Fechar">Fechar</button>
+    <div class="acoes-cab"><button class="aj" type="button" data-ajuda="editor" aria-label="Ajuda: como preencher" title="Ajuda: como preencher">?</button>
+    <button class="bt leve" id="gavFechar" type="button" aria-label="Fechar">Fechar</button></div>
   </div>
   <form class="gav-corpo" id="formProc" novalidate>
     <div class="aviso-topo" id="gavMudou" hidden><span>Este processo foi alterado por outra pessoa enquanto você editava.</span><button class="bt" type="button" id="gavRecarregar">Ver a versão atual</button></div>
     <div class="bloco">
-      <h4>Dados do processo</h4>
+      <h4>Dados do processo<button class="aj" type="button" data-ajuda="bDados" aria-label="Ajuda: dados do processo">?</button></h4>
       <div class="grade">
         <label class="campo c1"><span>Nº</span><input name="numero" inputmode="numeric" required><span class="msg"></span></label>
-        <label class="campo c3"><span>Nº do processo administrativo</span><input name="processo" required><span class="msg"></span></label>
-        <label class="campo c2"><span>Regime jurídico</span><input name="regime" list="listaRegimes"><span class="msg"></span></label>
-        <label class="campo c4"><span>Cidade</span><input name="cidade"><span class="msg"></span></label>
-        <label class="campo c2"><span>Estado (UF)</span><input name="estado" maxlength="2" autocapitalize="characters" list="listaUFs"><span class="msg"></span></label>
-        <label class="campo c6"><span>Órgão público</span><input name="orgao"><span class="msg"></span></label>
+        <label class="campo c3"><span>Nº do processo administrativo</span><input name="processo" required placeholder="Ex.: 00.005746/2025-76"><span class="msg"></span></label>
+        <label class="campo c2"><span>Regime jurídico</span><input name="regime" list="listaRegimes" placeholder="Ex.: Estatutário"><span class="msg"></span></label>
+        <div class="campo c2"><span id="rotUF">Estado (UF)</span>
+          <div class="combo" id="cbUF"><input type="text" role="combobox" aria-labelledby="rotUF" aria-expanded="false" aria-controls="cbUFLista" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Digite: SP ou São Paulo"><button type="button" class="combo-seta" tabindex="-1" aria-label="Mostrar os estados"></button></div>
+          <div class="combo-lista" id="cbUFLista" role="listbox" hidden></div>
+          <input type="hidden" name="estado"><span class="msg"></span></div>
+        <div class="campo c4"><span id="rotMun">Município</span>
+          <div class="combo" id="cbMun"><input type="text" role="combobox" aria-labelledby="rotMun" aria-expanded="false" aria-controls="cbMunLista" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Digite o nome. Ex.: Floriano"><button type="button" class="combo-seta" tabindex="-1" aria-label="Mostrar os municípios"></button></div>
+          <div class="combo-lista" id="cbMunLista" role="listbox" hidden></div>
+          <input type="hidden" name="cidade"><span class="nota-campo" id="notaMun" hidden></span><span class="msg"></span></div>
+        <label class="campo c6"><span>Órgão público</span><input name="orgao" placeholder="Ex.: Prefeitura Municipal de Floriano/PI"><span class="msg"></span></label>
       </div>
     </div>
     <div class="bloco">
-      <h4>Cargos, jornada e salário</h4>
+      <h4>Cargos, jornada e salário<button class="aj" type="button" data-ajuda="bVagas" aria-label="Ajuda: cargos, jornada e salário">?</button></h4>
       <div class="grade">
         <label class="campo c6"><span>Cargo da área tecnológica</span><textarea name="cargo" rows="2"></textarea><span class="ajuda">Separe os cargos com ponto e vírgula, vírgula ou "e".</span></label>
         <label class="campo c3"><span>Jornada semanal</span><textarea name="jornada" rows="2"></textarea><span class="ajuda">Ex.: 40h; ou "Engenheiro Civil: 40h; Engenheiro Agrônomo: 20h".</span></label>
@@ -450,7 +522,7 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
       </div>
     </div>
     <div class="bloco">
-      <h4>Situação e ação judicial</h4>
+      <h4>Situação e ação judicial<button class="aj" type="button" data-ajuda="bSituacao" aria-label="Ajuda: situação e ação judicial">?</button></h4>
       <div class="grade">
         <label class="campo c6"><span>Status</span><textarea name="status" rows="2"></textarea></label>
         <label class="campo c3"><span>Nº do processo judicial (mandado de segurança)</span><input name="judicial"></label>
@@ -460,18 +532,24 @@ table.tab{width:100%;border-collapse:separate;border-spacing:0}
     </div>
     <div class="bloco" id="blocoExtras" hidden><h4>Outras colunas da planilha</h4><div class="extras" id="extras"></div></div>
     <div class="bloco">
-      <h4>Leitura do sistema</h4>
+      <h4>Leitura do sistema<button class="aj" type="button" data-ajuda="bLeitura" aria-label="Ajuda: leitura do sistema">?</button></h4>
       <div class="leitura" id="leitura"></div>
     </div>
   </form>
   <div class="gav-pe">
     <button class="bt perigo" type="button" id="gavRemover">Remover</button>
-    <span class="esp"></span>
+    <span class="esp gav-msg" id="gavMsg" role="alert"></span>
     <button class="bt" type="button" id="gavCancelar">Cancelar</button>
     <button class="bt pri" type="button" id="gavSalvar">Salvar</button>
   </div>
-</aside>
-<datalist id="listaUFs"></datalist>
+</div>
+</div>
+<div class="janela-bg ajuda-bg" id="ajuda" hidden>
+  <div class="ajuda-cx" role="dialog" aria-modal="true" aria-labelledby="ajudaTit">
+    <div class="ajuda-cab"><h3 id="ajudaTit">Ajuda</h3><button class="bt" type="button" id="ajudaFechar">Fechar</button></div>
+    <div class="ajuda-corpo" id="ajudaCorpo"></div>
+  </div>
+</div>
 <datalist id="listaRegimes"><option value="Estatutário"><option value="Celetista"><option value="Contrato Temporário"></datalist>
 
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTit">
@@ -506,6 +584,8 @@ const E = { perfil: null, linhas: [], porId: new Map(), leituras: new Map(), ibg
 
 /* ---------------- utilidades de interface ---------------- */
 function toast(msg, acao, erro){
+  // com o editor aberto, o aviso aparece no rodapé da janela, sem cobrir nada
+  if (!acao && !$('#gaveta').hidden){ const g = $('#gavMsg'); g.textContent = msg; g.classList.toggle('erro', !!erro); clearTimeout(E.tMsg); E.tMsg = setTimeout(() => { g.textContent = ''; }, 6000); return; }
   const t = document.createElement('div'); t.className = 'toast' + (erro ? ' erro' : '');
   const s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
   if (acao){ const b = document.createElement('button'); b.type = 'button'; b.textContent = acao.rotulo; b.onclick = () => { t.remove(); acao.fazer(); }; t.appendChild(b); }
@@ -516,14 +596,24 @@ function perguntar(titulo, texto, botoes){
   return new Promise(ok => {
     const m = $('#modal'); $('#modalTit').textContent = titulo; $('#modalTx').textContent = texto;
     const box = $('#modalAcoes'); box.innerHTML = '';
-    const fechar = v => { m.hidden = true; document.removeEventListener('keydown', tecla); ok(v); };
-    const tecla = e => { if (e.key === 'Escape') fechar(null); };
+    const fechar = v => { m.hidden = true; E.pergFechar = null; document.removeEventListener('keydown', tecla, true); ok(v); };
+    const tecla = e => { if (e.key === 'Escape'){ e.stopPropagation(); fechar(null); } };
+    E.pergFechar = fechar;
     botoes.forEach(b => { const el = document.createElement('button'); el.type = 'button'; el.className = 'bt ' + (b.classe || ''); el.textContent = b.rotulo; el.onclick = () => fechar(b.valor); box.appendChild(el); });
-    m.hidden = false; document.addEventListener('keydown', tecla);
+    m.hidden = false; document.addEventListener('keydown', tecla, true);
     (box.querySelector('.pri,.perigo') || box.lastChild).focus();
   });
 }
 const avisar = (titulo, texto) => perguntar(titulo, texto, [{ rotulo: 'Entendi', valor: true, classe: 'pri' }]);
+// janelas: fecham só com clique fora (apertar e soltar no véu); arrastar de dentro para fora não fecha
+function fecharSoComCliqueFora(bg, fechar){
+  let ini = null, fim = null;
+  bg.addEventListener('pointerdown', e => { ini = e.target; });
+  bg.addEventListener('pointerup', e => { fim = e.target; });
+  bg.addEventListener('click', e => { const fora = e.target === bg && ini === bg && fim === bg; ini = fim = null; if (fora) fechar(); });
+}
+fecharSoComCliqueFora($('#modal'), () => { if (E.pergFechar) E.pergFechar(null); });
+function travarFundo(){ document.documentElement.classList.toggle('com-janela', !$('#gaveta').hidden || !$('#ajuda').hidden); }
 function ocupado(sim){ $('#topo').classList.toggle('ocupado', !!sim); }
 function contar(el, alvo){
   const ini = Number(el.dataset.v || 0); el.dataset.v = alvo;
@@ -684,6 +774,131 @@ function valoresForm(){
   o.extras = E.editando && E.editando.extras ? E.editando.extras : {};
   return o;
 }
+/* ---------------- listas com busca: estado e município (lista oficial do IBGE) ---------------- */
+const UF_NOMES = { AC:'Acre', AL:'Alagoas', AM:'Amazonas', AP:'Amapá', BA:'Bahia', CE:'Ceará', DF:'Distrito Federal', ES:'Espírito Santo',
+  GO:'Goiás', MA:'Maranhão', MG:'Minas Gerais', MS:'Mato Grosso do Sul', MT:'Mato Grosso', PA:'Pará', PB:'Paraíba', PE:'Pernambuco',
+  PI:'Piauí', PR:'Paraná', RJ:'Rio de Janeiro', RN:'Rio Grande do Norte', RO:'Rondônia', RR:'Roraima', RS:'Rio Grande do Sul',
+  SC:'Santa Catarina', SE:'Sergipe', SP:'São Paulo', TO:'Tocantins' };
+const semAcento = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+function munsDaUf(uf){ return (E.ibge || []).filter(r => !uf || r[2] === uf); }
+function munOficial(nome, uf){ return (E.ibge || []).find(r => r[1] === nome && r[2] === uf) || null; }
+// marca o trecho digitado, sem acento e sem diferença de maiúscula
+function realce(texto, q){
+  if (!q) return esc(texto);
+  const base = Array.from(texto), norm = base.map(c => semAcento(c) || c);
+  const junto = norm.join(''), pos = junto.indexOf(q);
+  if (pos < 0) return esc(texto);
+  let ac = 0, i0 = -1, i1 = -1;
+  for (let i = 0; i < base.length; i++){ if (ac === pos && i0 < 0) i0 = i; ac += norm[i].length; if (ac >= pos + q.length){ i1 = i + 1; break; } }
+  if (i0 < 0 || i1 < 0) return esc(texto);
+  return esc(base.slice(0, i0).join('')) + '<mark>' + esc(base.slice(i0, i1).join('')) + '</mark>' + esc(base.slice(i1).join(''));
+}
+function criarCombo(o){
+  const caixa = $(o.caixa), inp = caixa.querySelector('input'), seta = caixa.querySelector('.combo-seta'), lista = $(o.lista), oculto = o.oculto();
+  const c = { valor: '', rotulo: '', ops: [], ativo: -1 };
+  const abrir = () => { lista.hidden = false; caixa.classList.add('aberto'); inp.setAttribute('aria-expanded', 'true'); };
+  const fechar = () => { lista.hidden = true; caixa.classList.remove('aberto'); inp.setAttribute('aria-expanded', 'false'); c.ativo = -1; inp.removeAttribute('aria-activedescendant'); };
+  function desenhar(){
+    const q = semAcento(inp.value === c.rotulo ? '' : inp.value);
+    const r = o.buscar(q);
+    c.ops = r.ops; c.ativo = r.ops.length ? 0 : -1;
+    lista.innerHTML = `<div class="combo-info">${r.info}</div>` + (r.ops.length ? r.ops.map((op, i) =>
+      `<div class="combo-op${i === c.ativo ? ' ativo' : ''}" id="${lista.id}-${i}" role="option" data-i="${i}" aria-selected="${op.v === c.valor}"><span>${realce(op.rot, q)}</span>${op.uf ? `<span class="uf">${esc(op.uf)}</span>` : ''}</div>`).join('')
+      : `<div class="combo-vazio">${r.vazio}</div>`);
+    if (c.ativo >= 0) inp.setAttribute('aria-activedescendant', lista.id + '-0');
+    abrir();
+  }
+  function mover(d){
+    if (!c.ops.length) return;
+    const els = lista.querySelectorAll('.combo-op');
+    if (els[c.ativo]) els[c.ativo].classList.remove('ativo');
+    c.ativo = (c.ativo + d + c.ops.length) % c.ops.length;
+    els[c.ativo].classList.add('ativo'); els[c.ativo].scrollIntoView({ block: 'nearest' });
+    inp.setAttribute('aria-activedescendant', els[c.ativo].id);
+  }
+  function escolher(op, silencioso){
+    c.valor = op ? op.v : ''; c.rotulo = op ? op.rotCampo : ''; inp.value = c.rotulo; oculto.value = c.valor;
+    fechar();
+    if (o.aoEscolher) o.aoEscolher(op, silencioso);
+    if (!silencioso) oculto.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  inp.addEventListener('input', desenhar);
+  inp.addEventListener('focus', () => { inp.select(); desenhar(); });
+  inp.addEventListener('click', () => { if (lista.hidden) desenhar(); });
+  seta.addEventListener('mousedown', e => e.preventDefault());
+  seta.addEventListener('click', () => { if (lista.hidden){ inp.focus(); desenhar(); } else fechar(); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown'){ e.preventDefault(); if (lista.hidden) desenhar(); else mover(1); }
+    else if (e.key === 'ArrowUp'){ e.preventDefault(); mover(-1); }
+    else if (e.key === 'Enter'){ if (!lista.hidden){ e.preventDefault(); if (c.ativo >= 0) escolher(c.ops[c.ativo]); } }
+    else if (e.key === 'Escape'){ if (!lista.hidden){ e.preventDefault(); e.stopPropagation(); inp.value = c.rotulo; fechar(); } }
+    else if (e.key === 'Tab'){ if (!lista.hidden && c.ativo >= 0 && inp.value !== c.rotulo && inp.value.trim()) escolher(c.ops[c.ativo]); }
+  });
+  lista.addEventListener('mousedown', e => e.preventDefault());
+  lista.addEventListener('click', e => { const el = e.target.closest('.combo-op'); if (el) escolher(c.ops[Number(el.dataset.i)]); });
+  // sem texto livre: ao sair do campo, volta ao último valor escolhido da lista
+  inp.addEventListener('blur', () => { setTimeout(() => { if (document.activeElement !== inp){ if (!inp.value.trim() && c.valor){ escolher(null); return; } inp.value = c.rotulo; fechar(); } }, 120); });
+  c.definir = (op) => escolher(op, true);
+  c.limpar = () => escolher(null, true);
+  return c;
+}
+const cbUF = criarCombo({
+  caixa: '#cbUF', lista: '#cbUFLista', oculto: () => F().elements.estado,
+  buscar: q => {
+    const ops = UFS.map(u => ({ v: u, rot: `${u} · ${UF_NOMES[u]}`, rotCampo: `${u} · ${UF_NOMES[u]}`, k: semAcento(u + ' ' + UF_NOMES[u]), s: semAcento(u), n: semAcento(UF_NOMES[u]) }))
+      .filter(op => !q || op.k.includes(q))
+      .sort((a, b) => (q ? (a.s === q ? 0 : a.n.startsWith(q) ? 1 : 2) - (b.s === q ? 0 : b.n.startsWith(q) ? 1 : 2) : 0) || a.v.localeCompare(b.v));
+    return { ops, info: q ? `${pl(ops.length, 'estado encontrado', 'estados encontrados')}. Use as setas e Enter, ou clique.` : 'Os 27 estados. Digite a sigla ou o nome. Ex.: "sp" ou "paulo".', vazio: 'Nenhum estado com esse nome. Ex.: digite "MA" ou "Maranhão".' };
+  },
+  aoEscolher: (op, silencioso) => {
+    const uf = op ? op.v : '';
+    if (F().elements.cidade.value && !munOficial(F().elements.cidade.value, uf)) cbMun.limpar();
+    $('#rotMun').textContent = uf ? `Município de ${UF_NOMES[uf]}` : 'Município';
+    if (!silencioso) setTimeout(() => { if (!F().elements.cidade.value) $('#cbMun input').focus(); }, 0);
+  },
+});
+const cbMun = criarCombo({
+  caixa: '#cbMun', lista: '#cbMunLista', oculto: () => F().elements.cidade,
+  buscar: q => {
+    const uf = F().elements.estado.value;
+    if (!E.ibge || !E.ibge.length) return { ops: [], info: 'Lista do IBGE ainda não carregada.', vazio: 'Aguarde e tente de novo.' };
+    const base = munsDaUf(uf);
+    if (!uf && q.length < 2) return { ops: [], info: 'Escolha o estado primeiro, ou digite pelo menos 2 letras do município.', vazio: 'Ex.: digite "flori" para ver Floriano (PI), Florianópolis (SC) e outros.' };
+    const ach = [];
+    for (const r of base){
+      const n = semAcento(r[1]); const p = q ? n.indexOf(q) : 0; if (p < 0) continue;
+      const g = !q ? 0 : n === q ? 0 : p === 0 ? 1 : n.includes(' ' + q) ? 2 : 3;
+      ach.push([g, r]);
+    }
+    ach.sort((a, b) => a[0] - b[0] || a[1][1].localeCompare(b[1][1], 'pt'));
+    const LIM = 80, ops = ach.slice(0, LIM).map(([, r]) => ({ v: r[1], uf: uf ? '' : r[2], ufReal: r[2], rot: r[1], rotCampo: r[1] + (uf ? '' : ` (${r[2]})`) }));
+    const onde = uf ? `em ${UF_NOMES[uf]}` : 'no Brasil';
+    const info = (q ? `${pl(ach.length, 'município encontrado', 'municípios encontrados')} ${onde}.` : `${pl(ach.length, 'município', 'municípios')} ${onde}, em ordem alfabética.`)
+      + (ach.length > LIM ? ` Mostrando os ${LIM} primeiros: digite mais letras para encontrar mais rápido.` : '');
+    return { ops, info, vazio: `Nenhum município ${onde} com esse nome. Confira a grafia${uf ? ' ou o estado escolhido' : ''}.` };
+  },
+  aoEscolher: (op, silencioso) => {
+    $('#notaMun').hidden = true;
+    if (op && op.ufReal && F().elements.estado.value !== op.ufReal) cbUF.definir({ v: op.ufReal, rotCampo: `${op.ufReal} · ${UF_NOMES[op.ufReal]}` });
+    if (op) $('#cbMun input').value = op.v;
+    if (op) cbMun.rotulo = op.v;
+  },
+});
+function definirLocal(cidade, uf){
+  cbUF.limpar(); cbMun.limpar(); $('#notaMun').hidden = true; $('#rotMun').textContent = 'Município';
+  const u = UFS.includes(uf) ? uf : '';
+  if (u) cbUF.definir({ v: u, rotCampo: `${u} · ${UF_NOMES[u]}` });
+  if (!cidade) return;
+  const exato = u && munOficial(cidade, u);
+  if (exato){ cbMun.definir({ v: exato[1], rotCampo: exato[1] }); return; }
+  const [cod, nomeOf, como] = u && E.I ? V.casarMun(cidade, u, E.I) : [null, null, ''];
+  const nota = $('#notaMun');
+  if (cod){ cbMun.definir({ v: nomeOf, rotCampo: nomeOf }); nota.textContent = `Na base estava "${cidade}". O nome oficial do IBGE é "${nomeOf}". Confira e salve.`; }
+  else nota.textContent = `Na base estava "${cidade}${uf ? '/' + uf : ''}", que não está na lista do IBGE${como ? ' (' + como + ')' : ''}. Escolha o estado e o município na lista.`;
+  nota.hidden = false;
+}
+
+/* ---------------- editor (janela central) ---------------- */
 function abrirEditor(id){
   const l = id ? E.porId.get(id) : null;
   if (id && !l) return toast('Este processo não existe mais.', null, true);
@@ -691,30 +906,33 @@ function abrirEditor(id){
   E.editando = l ? Object.assign({}, l) : { id: null, numero: prox, extras: null };
   const f = F(); f.reset();
   for (const c of V.CAMPOS) if (f.elements[c]) f.elements[c].value = E.editando[c] === null || E.editando[c] === undefined ? '' : E.editando[c];
+  definirLocal(E.editando.cidade || '', E.editando.estado || '');
   $$('#formProc .campo').forEach(c => { c.classList.remove('erro'); const m = c.querySelector('.msg'); if (m) m.textContent = ''; });
   $('#gavTitulo').textContent = l ? `Processo ${l.processo}` : 'Novo processo';
-  $('#gavSub').textContent = l ? `Nº ${l.numero} · última gravação em ${quando(l.atualizado_em)}` : 'Preencha pelo menos o Nº e o Nº do processo administrativo.';
-  $('#gavRemover').hidden = !l; $('#gavMudou').hidden = true;
+  $('#gavSub').textContent = l ? `Nº ${l.numero} · última gravação em ${quando(l.atualizado_em)}` : 'Preencha pelo menos o Nº, o Nº do processo administrativo, o estado e o município.';
+  $('#gavRemover').hidden = !l; $('#gavMudou').hidden = true; $('#gavMsg').textContent = '';
   const ex = E.editando.extras || {};
   $('#blocoExtras').hidden = !Object.keys(ex).length;
   $('#extras').innerHTML = Object.entries(ex).map(([k, v]) => `<div><b>${esc(k)}:</b> ${esc(v)}</div>`).join('');
-  $('#veu').hidden = false; $('#gaveta').hidden = false;
-  requestAnimationFrame(() => { $('#veu').classList.add('ab'); $('#gaveta').classList.add('ab'); });
+  E.base = JSON.stringify(V.normalizarLinha(valoresForm()).linha);
+  const g = $('#gaveta'); g.hidden = false; travarFundo();
+  $('#formProc').scrollTop = 0;
+  requestAnimationFrame(() => g.classList.add('ab'));
   ajustarAlturas(); lerAoVivo();
-  setTimeout(() => f.elements[l ? 'cidade' : 'processo'].focus({ preventScroll: true }), 260);
+  setTimeout(() => (l ? f.elements.orgao : f.elements.processo).focus({ preventScroll: true }), 240);
 }
 function editorSujo(){
   if (!E.editando) return false;
-  const { linha } = V.normalizarLinha(valoresForm());
-  return V.CAMPOS.some(c => (linha[c] === undefined ? null : linha[c]) !== (E.editando[c] === undefined ? null : E.editando[c]));
+  return JSON.stringify(V.normalizarLinha(valoresForm()).linha) !== E.base;
 }
 async function fecharEditor(forcar){
+  if ($('#gaveta').hidden) return;
   if (!forcar && editorSujo()){
     const r = await perguntar('Descartar as alterações?', 'Há mudanças neste processo que ainda não foram gravadas.', [{ rotulo: 'Continuar editando', valor: false }, { rotulo: 'Descartar', valor: true, classe: 'perigo' }]);
     if (!r) return;
   }
-  $('#veu').classList.remove('ab'); $('#gaveta').classList.remove('ab');
-  setTimeout(() => { $('#veu').hidden = true; $('#gaveta').hidden = true; }, 230);
+  const g = $('#gaveta'); g.classList.remove('ab');
+  setTimeout(() => { g.hidden = true; travarFundo(); }, 200);
   E.editando = null;
 }
 function ajustarAlturas(){ $$('#formProc textarea').forEach(t => { t.style.height = 'auto'; t.style.height = Math.min(240, t.scrollHeight + 2) + 'px'; }); }
@@ -725,8 +943,8 @@ function lerAoVivo(){
   const box = $('#leitura');
   if (!linha.numero) linha.numero = 0;
   const p = V.lerProcesso(linha, E.I);
-  if (p.ignorado){ box.innerHTML = '<p class="sub">Informe a cidade ou o órgão para o sistema ler o processo.</p>'; return; }
-  const mun = p.casado ? `${esc(p.cidade)}/${esc(p.uf)} <span class="selo verde">código IBGE ${esc(p.mun)}</span>` : `<span class="selo amb">não localizado no IBGE</span>`;
+  if (p.ignorado){ box.innerHTML = '<p class="sub">Escolha o município ou informe o órgão para o sistema ler o processo.</p>'; return; }
+  const mun = p.casado ? `${esc(p.cidade)}/${esc(p.uf)} <span class="selo verde">código IBGE ${esc(p.mun)}</span>` : `<span class="selo amb">escolha o município na lista</span>`;
   const vagas = p.vagas.length ? `<div style="overflow:auto"><table class="vagas"><thead><tr><th>Cargo</th><th class="r">Salário</th><th class="r">Jornada</th><th class="r">Piso 4.950-A</th><th class="r">Diferença</th></tr></thead><tbody>${
     p.vagas.map(v => { const ab = v.piso && v.salario < v.piso; return `<tr><td><b>${esc(v.cargo || 'não identificado')}</b></td><td class="r" data-l="Salário">${brl.format(v.salario)}</td><td class="r" data-l="Jornada">${v.horas ? nf.format(v.horas) + 'h' : 'n/d'}</td><td class="r" data-l="Piso">${v.piso ? brl.format(v.piso) : 'sem jornada'}</td><td class="r" data-l="Diferença">${v.piso ? `<span class="selo ${ab ? 'verm' : 'verde'}">${ab ? '−' + brl.format(v.piso - v.salario) : 'atende'}</span>` : ''}</td></tr>`; }).join('')
   }</tbody></table></div>` : '<p class="sub">Nenhum salário lido: este processo não gera vaga no painel.</p>';
@@ -737,23 +955,31 @@ function lerAoVivo(){
       <dt>Desdobramento</dt><dd>${esc(p.desdobramento)}</dd>
       <dt>Órgão</dt><dd>${esc(p.tipo)} · esfera ${esc(p.esfera.toLowerCase())}</dd>
     </dl>${vagas}${p.avisos.length ? `<ul class="apont">${p.avisos.map(a => `<li><b>${esc(a[1])}</b>${esc(a[2])}</li>`).join('')}</ul>` : '<span class="selo verde">Sem apontamentos</span>'}`;
-  marcarErros(erros);
+  marcarErros(erros, true);
 }
-function marcarErros(erros){
+function marcarErros(erros, aoVivo){
   const f = F();
   $$('#formProc .campo').forEach(c => { c.classList.remove('erro'); const m = c.querySelector('.msg'); if (m) m.textContent = ''; });
-  const alvo = e => /Nº do processo/.test(e) ? 'processo' : /Nº/.test(e) ? 'numero' : /Estado/.test(e) ? 'estado' : null;
+  const alvo = e => /Nº do processo/.test(e) ? 'processo' : /Nº/.test(e) ? 'numero' : /Estado|estado/.test(e) ? 'estado' : /unicípio/.test(e) ? 'cidade' : null;
   for (const e of erros){ const c = alvo(e); if (!c) continue; const lab = f.elements[c].closest('.campo'); lab.classList.add('erro'); lab.querySelector('.msg').textContent = e; }
+}
+// estado e município precisam vir da lista oficial do IBGE
+function errosLocal(linha){
+  const er = [];
+  if (!linha.estado || !UFS.includes(linha.estado)) er.push('Escolha o estado na lista');
+  else if (!linha.cidade || !munOficial(linha.cidade, linha.estado)) er.push('Escolha o município na lista do IBGE');
+  return er;
 }
 $('#gavFechar').addEventListener('click', () => fecharEditor());
 $('#gavCancelar').addEventListener('click', () => fecharEditor());
-$('#veu').addEventListener('click', () => fecharEditor());
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#gaveta').hidden && $('#modal').hidden) fecharEditor(); });
+fecharSoComCliqueFora($('#gaveta'), () => fecharEditor());
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#modal').hidden){ if (!$('#ajuda').hidden) return fecharAjuda(); if (!$('#gaveta').hidden) fecharEditor(); } });
 $('#btNovo').addEventListener('click', () => abrirEditor(null));
-$('#gavRecarregar').addEventListener('click', () => { const id = E.editando && E.editando.id; fecharEditor(true); setTimeout(() => abrirEditor(id), 260); });
+$('#gavRecarregar').addEventListener('click', () => { const id = E.editando && E.editando.id; fecharEditor(true); setTimeout(() => abrirEditor(id), 230); });
 
 $('#gavSalvar').addEventListener('click', async () => {
-  const { linha, erros } = V.normalizarLinha(valoresForm());
+  const { linha, erros: e0 } = V.normalizarLinha(valoresForm());
+  const erros = e0.concat(errosLocal(linha));
   if (erros.length){ marcarErros(erros); toast('Corrija os campos marcados.', null, true); return; }
   const id = E.editando.id;
   if (E.linhas.some(l => l.numero === linha.numero && l.id !== id)) { marcarErros(['Nº ' + linha.numero + ' já é usado por outro processo']); return; }
@@ -814,12 +1040,13 @@ function assinar(){
 }
 
 /* ---------------- abas ---------------- */
-function mostrar(v){
+function mostrar(v, suave){
   E.vista = v;
   $$('.aba').forEach(a => a.setAttribute('aria-selected', String(a.dataset.vista === v)));
   for (const n of ['processos', 'importar', 'historico']) $('#v-' + n).hidden = n !== v;
   if (v === 'historico') carregarLotes(true);
-  window.scrollTo({ top: 0 });
+  if (!suave) window.scrollTo({ top: 0 });
+  marcaRolagem();
 }
 $$('.aba').forEach(a => a.addEventListener('click', () => mostrar(a.dataset.vista)));
 
@@ -1091,8 +1318,125 @@ $('#listaLotes').addEventListener('click', async e => {
   }
 });
 
+/* ---------------- ajuda (?) com exemplos reais da base ---------------- */
+const agora = id => { const el = $('#' + id); return el ? el.textContent : ''; };
+const AJUDA = {
+  processos: () => ['Como usar a lista de processos', `
+    <p>Esta tela mostra todos os processos do Confea Valoriza gravados na base. O painel público lê esta mesma base.</p>
+    <h4>Passo a passo</h4>
+    <ol><li>Digite na busca o Nº, o processo, a cidade, o órgão ou o cargo. Ex.: <code>Floriano</code> mostra o processo Nº 3.</li>
+      <li>Use os filtros de estado e de situação. Ex.: estado <b>BA</b> mostra só os processos da Bahia.</li>
+      <li>Marque <b>Só com apontamentos</b> para ver os processos que precisam de conferência.</li>
+      <li>Clique em uma linha para ver, alterar ou remover o processo. Ele abre numa janela no centro da tela.</li>
+      <li>Clique em <b>Novo processo</b> para incluir um processo que não veio pela planilha.</li></ol>
+    <h4>Cartões de números</h4>
+    <p>Cada cartão tem um <b>?</b> com a explicação e um exemplo.</p>
+    <div class="ex"><b>Exemplo real.</b> O processo Nº 6 (Prefeitura Municipal de Araci/BA) oferece Engenheiro Civil, 40h, R$ 5.000,00. O piso da Lei 4.950-A para 40h é R$ 10.302,00. A vaga conta como abaixo do piso.</div>`],
+  kProc: () => ['Cartão Processos', `
+    <p>Conta as linhas da base. Uma linha é um processo administrativo.</p>
+    <p>Valor agora: <b>${agora('kProc')} processos</b>.</p>
+    <div class="ex"><b>Exemplo real.</b> A linha Nº 1 é o processo <code>00.005737/2025-85</code>, da Prefeitura Municipal de Cantanhede/MA. Ela conta como 1 processo.</div>`],
+  kVagas: () => ['Cartão Vagas', `
+    <p>Conta as vagas. Cada salário escrito na coluna Salário é uma vaga.</p>
+    <p>Valor agora: <b>${agora('kVagas')} vagas</b>.</p>
+    <div class="ex"><b>Exemplo real.</b> O processo Nº 2 (Pedro Canário/ES) tem o salário <code>R$ 2.774,67;R$ 3.699,56; respectivamente</code>. São 2 salários, então são 2 vagas: Engenheiro Ambiental e Engenheiro Agrônomo.</div>`],
+  kAbaixo: () => ['Cartão Abaixo do piso', `
+    <p>Conta as vagas com salário menor que o piso da Lei 4.950-A/1966 para a jornada da vaga.</p>
+    <p>O piso usa o salário mínimo de 2022 (R$ 1.212,00), conforme as ADPFs 53, 149 e 171 do STF: 6 salários mínimos para até 6h por dia e 1,25 salário mínimo a mais por hora diária acima de 6h. Ex.: 40h por semana são 8h por dia: 8,5 salários mínimos, R$ 10.302,00.</p>
+    <p>Valor agora: <b>${agora('kAbaixo')} vagas</b>, ${esc(agora('kAbaixoPct'))}.</p>
+    <div class="ex"><b>Exemplo real.</b> O processo Nº 1 (Cantanhede/MA) oferece Engenheiro Agrônomo, 20h, R$ 2.795,00. O piso para 20h é R$ 7.272,00. Faltam R$ 4.477,00: a vaga está abaixo do piso.</div>`],
+  kAvisos: () => ['Cartão Apontamentos', `
+    <p>Conta os itens que o sistema não leu com segurança e que pedem conferência.</p>
+    <p>Valor agora: <b>${agora('kAvisos')} apontamentos</b>.</p>
+    <h4>Apontamentos mais comuns</h4>
+    <ul><li><b>Sem jornada apurável</b>: a coluna Jornada está vazia ou sem horas. Escreva, por exemplo, <code>40h</code>.</li>
+      <li><b>Sem salário apurável</b>: a coluna Salário não tem valor em reais. Escreva, por exemplo, <code>R$ 5.000,00</code>.</li>
+      <li><b>Município ajustado ao nome oficial do IBGE</b>: o nome estava escrito de outro jeito. Abra o processo, confira o município e salve.</li></ul>
+    <div class="ex"><b>Como resolver.</b> Marque "Só com apontamentos", clique no processo, corrija o campo e clique em Salvar.</div>`],
+  importar: () => ['Como importar a planilha', `
+    <p>Use esta tela quando houver uma nova versão da planilha "Processos Confea Valoriza".</p>
+    <ol><li>Arraste o arquivo .xlsx para o quadro ou clique nele para escolher o arquivo.</li>
+      <li>Espere a conferência. Nada é gravado nesta etapa.</li>
+      <li>Veja os quatro cartões: <b>Novos</b>, <b>Alterados</b>, <b>Sem alteração</b> e <b>Fora da planilha</b>. Clique em cada um para ver a lista.</li>
+      <li>Em Alterados, o valor antigo aparece riscado em vermelho e o novo em verde.</li>
+      <li>Clique em <b>Aplicar importação</b> para gravar. Tudo fica no Histórico e pode ser desfeito.</li></ol>
+    <div class="ex"><b>Exemplo.</b> Se a nova planilha mudou o Status do Nº 3 (Floriano/PI) para "Êxito", esse processo aparece em Alterados, com o status antigo "Ação Judicial postulada" riscado.</div>
+    <p>A comparação usa a coluna <b>Nº</b>. Não troque o Nº de um processo que já existe.</p>`],
+  historico: () => ['Como usar o histórico', `
+    <p>Cada gravação forma um <b>lote</b>: importação, inclusão, alteração ou remoção.</p>
+    <ol><li>Clique em <b>Ver detalhes</b> para ver cada processo que mudou no lote.</li>
+      <li>Clique em <b>Desfazer</b> para voltar a base ao estado anterior ao lote. O desfazer também vira um lote e pode ser desfeito.</li>
+      <li>Em importações, clique em <b>Baixar a planilha enviada</b> para ter o arquivo exato daquele dia.</li>
+      <li>Troque "Alterações na base" por "Entradas e saídas" para ver quem entrou no sistema e quando.</li></ol>
+    <div class="ex"><b>Exemplo.</b> Se uma importação trouxe 10 alterações por engano, clique em Desfazer naquele lote. Os 10 processos voltam ao que eram antes.</div>`],
+  editor: () => ['Como preencher um processo', `
+    <p>Preencha os campos como na planilha. A caixa <b>Leitura do sistema</b>, no fim, mostra na hora como o painel vai ler o processo.</p>
+    <h4>Campos obrigatórios</h4>
+    <ul><li><b>Nº</b>: número da linha. Ex.: <code>3</code>.</li>
+      <li><b>Nº do processo administrativo</b>. Ex.: <code>00.005746/2025-76</code>.</li>
+      <li><b>Estado</b> e <b>Município</b>: escolha na lista do IBGE. Não é possível digitar um nome fora da lista.</li></ul>
+    <h4>Estado e município</h4>
+    <ol><li>No campo Estado, digite a sigla ou parte do nome. Ex.: <code>pi</code> ou <code>piauí</code>. As opções aparecem logo abaixo, com o trecho digitado em destaque.</li>
+      <li>Clique na opção, ou use as setas e Enter.</li>
+      <li>No campo Município, digite parte do nome. Ex.: <code>flori</code> mostra Floriano.</li></ol>
+    <p>Você também pode digitar o município primeiro: ao escolher Floriano (PI), o estado PI é preenchido sozinho.</p>
+    <div class="ex"><b>Exemplo real (Nº 3).</b> Estado PI · Piauí; Município Floriano; Órgão Prefeitura Municipal de Floriano/PI; Cargo "Engenheiro Civil, Engenheiro Agrônomo e Engenheiro Ambiental"; Jornada 40h; Salário R$ 2.127,00; Status "Ação Judicial postulada"; Processo judicial 1008288-94.2025.4.01.4003.</div>
+    <p>Cada bloco tem um <b>?</b> com mais detalhes.</p>`],
+  bDados: () => ['Dados do processo', `
+    <ul><li><b>Nº</b>: número único da linha na planilha. Dois processos não podem ter o mesmo Nº.</li>
+      <li><b>Nº do processo administrativo</b>: como está na planilha. Ex.: <code>00.005737/2025-85</code>.</li>
+      <li><b>Regime jurídico</b>: Estatutário, Celetista ou Contrato Temporário. Pode ficar vazio.</li>
+      <li><b>Estado</b>: escolha na lista. Ex.: digite <code>ma</code> e escolha MA · Maranhão.</li>
+      <li><b>Município</b>: escolha na lista do IBGE. Ex.: digite <code>cantan</code> e escolha Cantanhede.</li>
+      <li><b>Órgão público</b>: nome do órgão do edital. Ex.: <code>Prefeitura Municipal de Cantanhede/MA</code>. O sistema usa o nome para saber a esfera (municipal, estadual ou federal).</li></ul>
+    <div class="ex">Se o processo antigo tinha um nome de município fora do padrão, um aviso amarelo mostra o nome antigo e o nome oficial sugerido. Confira e salve.</div>`],
+  bVagas: () => ['Cargos, jornada e salário', `
+    <p>Cada salário é uma vaga. O sistema liga o 1º salário ao 1º cargo, o 2º ao 2º, e assim por diante.</p>
+    <ul><li><b>Cargo</b>: separe com ponto e vírgula, vírgula ou "e". Ex.: <code>Engenheiro Ambiental e Engenheiro Agrônomo</code>.</li>
+      <li><b>Jornada semanal</b>: horas por semana. Ex.: <code>40h</code>. Se cada cargo tem uma jornada: <code>Engenheiro Civil: 40h; Engenheiro Agrônomo: 20h</code>.</li>
+      <li><b>Salário</b>: em reais, separados por ponto e vírgula. Ex.: <code>R$ 2.774,67; R$ 3.699,56</code>.</li></ul>
+    <div class="ex"><b>Exemplo real (Nº 2, Pedro Canário/ES).</b> Cargo "Engenheiro Ambiental e Engenheiro Agrônomo", Jornada 40h, Salário "R$ 2.774,67;R$ 3.699,56". Resultado: 2 vagas, as duas abaixo do piso de R$ 10.302,00 para 40h.</div>
+    <p>Valor de estagiário não entra no cálculo.</p>`],
+  bSituacao: () => ['Situação e ação judicial', `
+    <ul><li><b>Status</b>: o que aconteceu com o processo. O sistema lê o texto e classifica a situação. Ex.: "Ação Judicial postulada" vira <b>Judicializado</b>.</li>
+      <li><b>Nº do processo judicial</b>: no padrão do CNJ. Ex.: <code>1008288-94.2025.4.01.4003</code>. O sistema identifica o tribunal pelo número.</li>
+      <li><b>Comarca</b>: onde corre a ação. Ex.: <code>Vara Federal Cível e Criminal da SSJ de Floriano-PI</code>.</li>
+      <li><b>Desdobramento</b>: o resultado depois da ação, se houver. Pode ficar vazio.</li></ul>
+    <div class="ex"><b>Exemplo real (Nº 6, Araci/BA).</b> Status "Ação Judicial postulada"; processo judicial 1002418-09.2026.4.01.3300. A Leitura do sistema mostra a situação Judicializado.</div>`],
+  bLeitura: () => ['Leitura do sistema', `
+    <p>Esta caixa mostra, enquanto você digita, como o painel público vai ler o processo. Nada é gravado aqui.</p>
+    <ul><li><b>Município</b>: verde com o código do IBGE quando o município foi escolhido na lista.</li>
+      <li><b>Vagas</b>: uma linha por salário, com o piso da jornada e a diferença. Vermelho é abaixo do piso. Verde atende ao piso.</li>
+      <li><b>Apontamentos</b>: itens em amarelo para conferir antes de salvar.</li></ul>
+    <div class="ex"><b>Exemplo real (Nº 1, Cantanhede/MA).</b> Engenheiro Agrônomo, R$ 2.795,00, 20h. Piso R$ 7.272,00. Diferença −R$ 4.477,00, em vermelho.</div>`],
+};
+function abrirAjuda(chave, origem){
+  const f = AJUDA[chave]; if (!f) return;
+  const [t, html] = f();
+  $('#ajudaTit').textContent = t; $('#ajudaCorpo').innerHTML = html; $('#ajudaCorpo').scrollTop = 0;
+  E.ajudaOrigem = origem || null;
+  const a = $('#ajuda'); a.hidden = false; travarFundo(); requestAnimationFrame(() => a.classList.add('ab'));
+  $('#ajudaFechar').focus({ preventScroll: true });
+}
+function fecharAjuda(){
+  const a = $('#ajuda'); if (a.hidden) return;
+  a.classList.remove('ab'); setTimeout(() => { a.hidden = true; travarFundo(); }, 180);
+  if (E.ajudaOrigem) E.ajudaOrigem.focus({ preventScroll: true });
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-ajuda]'); if (b){ e.preventDefault(); e.stopPropagation(); abrirAjuda(b.dataset.ajuda, b); } });
+$('#ajudaFechar').addEventListener('click', fecharAjuda);
+fecharSoComCliqueFora($('#ajuda'), fecharAjuda);
+
+/* ---------------- botão Início ---------------- */
+$('#btInicio').addEventListener('click', () => {
+  mostrar('processos', true);
+  window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const r = $('#tabProc').closest('.rolagem'); if (r) r.scrollTo({ top: 0, behavior: 'smooth' });
+});
+const marcaRolagem = () => document.documentElement.classList.toggle('rolou', scrollY > 160 || E.vista !== 'processos');
+addEventListener('scroll', marcaRolagem, { passive: true });
+
 /* ---------------- início ---------------- */
-$('#listaUFs').innerHTML = UFS.map(u => `<option value="${u}">`).join('');
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) await entrar(false); else telaLogin();

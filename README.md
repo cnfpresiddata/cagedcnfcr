@@ -5,7 +5,7 @@
 | Painel | https://cnfpresiddata.github.io/cagedcnfcr/ |
 | Administração do Confea Valoriza | https://cnfpresiddata.github.io/cagedcnfcr/adm/ |
 | Banco | Supabase `rmjlqngrfgorhcwaarou` (banco único CONFEA), schema `caged` |
-| Autor | Bruno-LSO |
+| Desenvolvido por | Alexandre Borsato e Bruno Lima |
 
 ## Como funciona
 
@@ -59,9 +59,20 @@ Opções do script: `--manter-caged`, `--ensaio` (grava, confere e descarta), `-
 - **Processos**: busca, filtros, inclusão, alteração e remoção; a "Leitura do sistema" mostra as vagas, o piso e os apontamentos enquanto a pessoa digita.
 - **Importar planilha**: envia o .xlsx como está; o sistema mostra novos, alterados (campo a campo), sem alteração e fora da planilha, e só grava depois da confirmação. O arquivo original fica guardado (bucket `caged`, nome pelo SHA-256).
 - **Histórico**: todos os lotes, com detalhes, download da planilha enviada e botão para desfazer.
+- **Editor**: abre numa janela no centro da tela. Fecha com clique fora, Esc ou Fechar; clicar dentro e soltar fora não fecha.
+- **Estado e município**: escolha numa lista com busca, a partir da lista oficial do IBGE gravada no banco (27 UFs, 5.571 municípios). Não aceita texto livre. Digitar o município primeiro preenche o estado. Processo antigo com nome fora do IBGE mostra o nome antigo e a sugestão oficial.
+- **Ajuda**: botão "?" em cada tela, em cada cartão de número e em cada bloco do editor, com exemplos reais da base.
+- **Início**: botão fixo no topo; volta à lista de processos com rolagem suave.
+
+## Interface do painel
+
+- Tudo o que abre por clique (filtros de UF, município e famílias, botão "i", ajuda "?") aparece numa janela no centro, com as mesmas regras de fechamento do /adm.
+- Botão "Início" fixo no topo e botão "?" em cada folha, com os números do recorte atual.
+- Conferido sem sobreposição: 12 folhas, 2 modos, 10 tamanhos de tela (320 a 2560 px).
 
 ## Histórico de versões
 
 | Data | Versão | Autor | Mudança |
 |---|---|---|---|
 | 22/11/2026 | 3.4.0 | Bruno-LSO | Dados no Supabase; administração do Confea Valoriza em /adm; pipeline grava no banco. |
+| 22/11/2026 | 3.5.0 | Bruno-LSO | Janelas centrais; estado e município do IBGE com busca; ajuda "?" com exemplos; botão Início; layout sem sobreposição; crédito a Alexandre Borsato e Bruno Lima. |
