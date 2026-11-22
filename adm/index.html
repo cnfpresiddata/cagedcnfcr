@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Confea Valoriza · Administração</title>
+<link rel="icon" href="brasao.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="../valoriza.js?v=1"></script>
+<style>
+:root{
+  --azul:#00509b; --azul-2:#0a6bb5; --azul-deep:#00396e; --azul-900:#00284f;
+  --ouro:#ba9705; --ouro-2:#d9c46a; --ouro-bg:#faf4de;
+  --bg:#eef2f7; --sup:#ffffff; --sup-2:#f6f9fc; --tx:#162536; --tx2:#4c6072; --tx3:#7d8fa0;
+  --ln:#dde6ef; --ln2:#c9d5e2;
+  --verde:#1d7a45; --verde-bg:#e6f4ec; --verm:#b3261e; --verm-bg:#fdeceb; --amb:#9a6200; --amb-bg:#fff3d9;
+  --r:10px; --r-sm:7px; --sombra:0 1px 2px rgba(16,37,62,.06),0 4px 14px rgba(16,37,62,.06);
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"SFMono-Regular",monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Archivo,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+a{color:var(--azul)}
+:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- botões ---------- */
+.bt{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:8px 16px;border-radius:var(--r-sm);
+  border:1px solid var(--ln2);background:var(--sup);font-weight:600;white-space:nowrap;transition:background .15s,border-color .15s,transform .1s}
+.bt:hover{border-color:var(--azul);color:var(--azul)}
+.bt:active{transform:translateY(1px)}
+.bt.pri{background:var(--azul-deep);border-color:var(--azul-deep);color:#fff}
+.bt.pri:hover{background:var(--azul);border-color:var(--azul);color:#fff}
+.bt.perigo{color:var(--verm);border-color:#e7b9b5}
+.bt.perigo:hover{background:var(--verm);border-color:var(--verm);color:#fff}
+.bt.leve{border-color:transparent;background:transparent;color:var(--azul)}
+.bt.leve:hover{background:#e7f0f8}
+.bt[disabled]{opacity:.45;pointer-events:none}
+.bt svg{width:16px;height:16px;flex:none}
+
+/* ---------- login ---------- */
+.login{min-height:100dvh;display:grid;place-items:center;padding:16px;
+  background:linear-gradient(160deg,var(--azul-900) 0%,var(--azul-deep) 55%,var(--azul) 100%)}
+.login-cx{width:min(400px,100%);background:var(--sup);border-radius:14px;padding:28px 24px 24px;box-shadow:0 20px 50px rgba(0,20,45,.35);display:grid;gap:16px}
+.login-cx img{width:100%;max-width:300px;height:auto;justify-self:center}
+.login-cx h1{margin:4px 0 0;font-size:20px;line-height:1.2}
+.login-cx p{margin:0;color:var(--tx2)}
+.campo{display:grid;gap:5px}
+.campo>span{font-size:12px;font-weight:600;color:var(--tx2)}
+.campo input,.campo select,.campo textarea{width:100%;min-height:40px;padding:8px 11px;border:1px solid var(--ln2);border-radius:var(--r-sm);background:var(--sup)}
+.campo textarea{resize:vertical;min-height:62px;line-height:1.4}
+.campo input:focus,.campo select:focus,.campo textarea:focus{outline:none;border-color:var(--azul);box-shadow:0 0 0 3px rgba(0,80,155,.15)}
+.campo.erro input,.campo.erro textarea{border-color:var(--verm);box-shadow:0 0 0 3px rgba(179,38,30,.12)}
+.login-msg{min-height:20px;color:var(--verm);font-weight:500}
+
+/* ---------- topo ---------- */
+.app{min-height:100dvh;display:grid;grid-template-rows:auto 1fr}
+.topo{position:sticky;top:0;z-index:20;background:var(--sup);border-bottom:1px solid var(--ln)}
+.topo-in{max-width:1400px;margin:0 auto;padding:10px 16px 0;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px 18px}
+.marca{display:flex;align-items:center;gap:14px;min-width:0}
+.marca img{height:30px;width:auto}
+.marca-tx{display:grid;line-height:1.15;border-left:1px solid var(--ln);padding-left:14px;min-width:0}
+.marca-tx span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ouro);font-weight:700}
+.marca-tx b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.abas{grid-column:1/-1;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin:0 -4px}
+.abas::-webkit-scrollbar{display:none}
+.aba{position:relative;border:0;background:none;padding:12px 14px 13px;font-weight:600;color:var(--tx2);white-space:nowrap;border-radius:8px 8px 0 0}
+.aba:hover{color:var(--azul)}
+.aba[aria-selected="true"]{color:var(--azul-deep)}
+.aba[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--azul)}
+.aba .cont{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--sup-2);border:1px solid var(--ln);color:var(--tx2)}
+.topo-dir{display:flex;align-items:center;gap:8px;justify-self:end}
+.usuario{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--tx2)}
+.usuario i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--azul-deep);color:#fff;font-style:normal;font-size:13px}
+.linha-viva{position:absolute;left:0;right:0;bottom:-1px;height:2px;overflow:hidden;pointer-events:none}
+.linha-viva::after{content:"";position:absolute;top:0;bottom:0;width:22%;left:-22%;
+  background:linear-gradient(90deg,rgba(186,151,5,0),var(--ouro),rgba(186,151,5,0));animation:varre 5.5s var(--ease) infinite}
+.ocupado .linha-viva::after{animation-duration:1.2s}
+@keyframes varre{0%{left:-22%}60%,100%{left:100%}}
+
+/* ---------- conteúdo ---------- */
+main{max-width:1400px;width:100%;margin:0 auto;padding:16px 16px 40px;display:grid;gap:14px;align-content:start}
+.vista{display:grid;gap:14px;min-width:0}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cab h2{margin:0;font-size:20px;line-height:1.2}
+.cab p{margin:4px 0 0;color:var(--tx2);max-width:760px}
+.cab select{min-height:38px;padding:7px 10px;border:1px solid var(--ln2);border-radius:var(--r-sm);background:var(--sup);font-weight:500}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:12px 14px;display:grid;gap:2px;box-shadow:var(--sombra);position:relative;overflow:hidden}
+.kpi span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);font-weight:700}
+.kpi b{font-size:26px;line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--tx2)}
+.kpi.alerta b{color:var(--verm)}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--azul)}
+.kpi.alerta::before{background:var(--verm)}
+.kpi.ouro::before{background:var(--ouro)}
+
+.barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:10px;box-shadow:var(--sombra)}
+.barra .busca{flex:1 1 240px;min-width:0;position:relative}
+.barra .busca input{width:100%;min-height:38px;padding:8px 12px 8px 36px;border:1px solid var(--ln2);border-radius:var(--r-sm);background:var(--sup)}
+.barra .busca svg{position:absolute;left:11px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--tx3)}
+.barra select{min-height:38px;padding:7px 10px;border:1px solid var(--ln2);border-radius:var(--r-sm);background:var(--sup);max-width:100%}
+.chk{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 10px;border:1px solid var(--ln2);border-radius:var(--r-sm);background:var(--sup);font-weight:500;cursor:pointer;user-select:none}
+.chk input{accent-color:var(--azul);width:16px;height:16px;margin:0}
+.barra .bt.pri{margin-left:auto}
+
+/* ---------- tabela ---------- */
+.quadro{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);box-shadow:var(--sombra);overflow:hidden;min-width:0}
+.quadro-info{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--ln);color:var(--tx2);font-size:13px}
+.rolagem{overflow:auto;max-height:calc(100dvh - 330px);min-height:240px}
+table.tab{width:100%;border-collapse:separate;border-spacing:0}
+.tab th{position:sticky;top:0;z-index:1;background:var(--sup-2);text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);
+  padding:9px 12px;border-bottom:1px solid var(--ln);white-space:nowrap}
+.tab th button{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+.tab th button:focus-visible{outline:2px solid var(--ouro)}
+.tab td{padding:9px 12px;border-bottom:1px solid var(--ln);vertical-align:top}
+.tab tbody tr{cursor:pointer;transition:background .15s}
+.tab tbody tr:hover{background:#f3f7fb}
+.tab td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tab .sub{display:block;color:var(--tx3);font-size:12px}
+.tab .corta{max-width:340px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.selo{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--sup-2);border:1px solid var(--ln);color:var(--tx2)}
+.selo.verde{background:var(--verde-bg);border-color:#bfe2cd;color:var(--verde)}
+.selo.verm{background:var(--verm-bg);border-color:#f2c4c0;color:var(--verm)}
+.selo.amb{background:var(--amb-bg);border-color:#f0d9a6;color:var(--amb)}
+.selo.azul{background:#e7f0f8;border-color:#cfe0ef;color:var(--azul-deep)}
+.selo.ouro{background:var(--ouro-bg);border-color:#ecdca0;color:#7c6503}
+.vazio{padding:36px 16px;text-align:center;color:var(--tx2)}
+@keyframes brilho{from{background:var(--ouro-bg)}to{background:transparent}}
+.tab tr.mudou td{animation:brilho 2.2s ease}
+
+/* ---------- gaveta do editor ---------- */
+.veu{position:fixed;inset:0;z-index:40;background:rgba(10,25,45,.42);opacity:0;transition:opacity .2s}
+.veu.ab{opacity:1}
+.gaveta{position:fixed;z-index:41;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--bg);display:grid;grid-template-rows:auto 1fr auto;
+  box-shadow:-12px 0 40px rgba(0,20,45,.2);transform:translateX(100%);transition:transform .25s var(--ease)}
+.gaveta.ab{transform:none}
+.gav-cab{background:var(--sup);border-bottom:1px solid var(--ln);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+.gav-cab h3{margin:0;font-size:17px;line-height:1.25}
+.gav-cab small{color:var(--tx2)}
+.gav-corpo{overflow:auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start}
+.gav-corpo>*,.bloco,.leitura,.leitura dl dd{min-width:0}
+.grade{align-items:start}
+.gav-pe{background:var(--sup);border-top:1px solid var(--ln);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.gav-pe .esp{flex:1}
+.bloco{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:14px;display:grid;gap:12px}
+.bloco>h4{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);display:flex;align-items:center;gap:8px}
+.bloco>h4::before{content:"";width:14px;height:2px;background:var(--ouro);display:block}
+.grade{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.grade .c1{grid-column:span 1}.grade .c2{grid-column:span 2}.grade .c3{grid-column:span 3}.grade .c4{grid-column:span 4}.grade .c6{grid-column:span 6}
+.campo .ajuda{font-size:12px;color:var(--tx3)}
+.campo .msg{font-size:12px;color:var(--verm);font-weight:500}
+.aviso-topo{padding:10px 12px;border-radius:var(--r-sm);background:var(--amb-bg);border:1px solid #f0d9a6;color:#6e4700;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.leitura{display:grid;gap:10px}
+.leitura-lin{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.leitura-lin dt{font-size:12px;color:var(--tx3);font-weight:600}
+.leitura-lin dd{margin:0 10px 0 0;font-weight:600}
+.leitura dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
+.vagas{width:100%;border-collapse:collapse;font-size:13px}
+.vagas th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);padding:6px 8px;border-bottom:1px solid var(--ln)}
+.vagas td{padding:7px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
+.vagas td.r,.vagas th.r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.apont{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.apont li{padding:8px 10px;border-radius:var(--r-sm);background:var(--amb-bg);border:1px solid #f0d9a6;color:#5e3d00;font-size:13px}
+.apont li b{display:block;color:#6e4700}
+.extras{display:grid;gap:4px;font-size:13px}
+
+/* ---------- importação ---------- */
+.solta{display:grid;place-items:center;text-align:center;gap:10px;padding:40px 16px;border:2px dashed var(--ln2);border-radius:14px;background:var(--sup);
+  transition:border-color .2s,background .2s;cursor:pointer}
+.solta:hover,.solta.sobre{border-color:var(--azul);background:#f4f8fc}
+.solta svg{width:44px;height:44px;color:var(--azul)}
+.solta b{font-size:17px}
+.solta p{margin:0;color:var(--tx2);max-width:520px}
+.passos3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.passo3{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:12px 14px;display:grid;gap:4px}
+.passo3 em{font-style:normal;font:700 12px var(--mono);color:var(--ouro)}
+.passo3 p{margin:0;color:var(--tx2);font-size:13px}
+.analise{background:var(--azul-900);color:#dce8f4;border-radius:var(--r);padding:16px;display:grid;gap:10px;font-family:var(--mono);font-size:13px}
+.analise li{list-style:none;display:flex;justify-content:space-between;gap:10px;opacity:.45;transition:opacity .2s}
+.analise li.feito{opacity:1}
+.analise li.feito::before{content:"ok";color:var(--ouro-2);margin-right:10px}
+.analise li.atual{opacity:1}
+.analise li.atual::before{content:"..";color:var(--ouro-2);margin-right:10px}
+.analise ul{margin:0;padding:0;display:grid;gap:6px}
+.analise .barrinha{height:4px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+.analise .barrinha b{display:block;height:100%;width:0;background:var(--ouro);transition:width .2s}
+.arquivo{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:12px 14px;background:var(--sup);border:1px solid var(--ln);border-radius:var(--r)}
+.arquivo b{font-size:15px}
+.arquivo code{font:12px var(--mono);color:var(--tx2)}
+.resumo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.rcard{all:unset;cursor:pointer;background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:12px 14px;display:grid;gap:2px;box-shadow:var(--sombra);position:relative}
+.rcard span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);font-weight:700}
+.rcard b{font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.rcard small{color:var(--tx2)}
+.rcard[aria-pressed="true"]{border-color:var(--azul);box-shadow:0 0 0 2px rgba(0,80,155,.2)}
+.rcard:focus-visible{outline:2px solid var(--ouro)}
+.rcard.novo b{color:var(--verde)} .rcard.alt b{color:var(--amb)} .rcard.fora b{color:var(--verm)}
+.painel-msg{border-radius:var(--r);padding:12px 14px;display:grid;gap:6px}
+.painel-msg.erro{background:var(--verm-bg);border:1px solid #f2c4c0;color:#7a1a14}
+.painel-msg.atencao{background:var(--amb-bg);border:1px solid #f0d9a6;color:#5e3d00}
+.painel-msg.ok{background:var(--verde-bg);border:1px solid #bfe2cd;color:#0f4f2b}
+.painel-msg h4{margin:0;font-size:14px}
+.painel-msg ul{margin:0;padding-left:18px;display:grid;gap:3px}
+.dif{display:grid;gap:8px}
+.dif-item{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);padding:10px 12px;display:grid;gap:6px}
+.dif-item>header{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.dif-item>header b{font-variant-numeric:tabular-nums}
+.dif-campo{display:grid;grid-template-columns:minmax(120px,180px) 1fr;gap:4px 12px;font-size:13px}
+.dif-campo dt{color:var(--tx2);font-weight:600}
+.dif-campo dd{margin:0;display:grid;gap:3px;min-width:0}
+.dif-campo .de{color:var(--verm);text-decoration:line-through;text-decoration-color:rgba(179,38,30,.5);overflow-wrap:anywhere;white-space:pre-wrap}
+.dif-campo .para{color:var(--verde);overflow-wrap:anywhere;white-space:pre-wrap}
+.acoes-imp{display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;bottom:0;padding:12px;background:rgba(238,242,247,.94);backdrop-filter:blur(4px);border-top:1px solid var(--ln);margin:0 -16px;padding-left:16px;padding-right:16px}
+.acoes-imp .esp{flex:1}
+
+/* ---------- histórico ---------- */
+.lotes{display:grid;gap:10px}
+.lote{background:var(--sup);border:1px solid var(--ln);border-radius:var(--r);box-shadow:var(--sombra);padding:12px 14px;display:grid;gap:8px}
+.lote.desfeito{opacity:.72}
+.lote-cab{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
+.lote-cab .quando{color:var(--tx2);font-size:13px}
+.lote-cab .id{font:12px var(--mono);color:var(--tx3);margin-left:auto}
+.lote p{margin:0}
+.lote-acoes{display:flex;gap:6px;flex-wrap:wrap}
+.eventos{margin:0;padding:0;list-style:none;display:grid;gap:4px;max-height:360px;overflow:auto;border-top:1px solid var(--ln);padding-top:8px}
+.eventos li{font-size:13px;color:var(--tx2);display:grid;grid-template-columns:auto 1fr;gap:10px}
+.eventos li time{font:12px var(--mono);color:var(--tx3);white-space:nowrap}
+
+/* ---------- modal e avisos ---------- */
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,25,45,.5)}
+.modal-cx{width:min(520px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--sup);border-radius:14px;padding:20px;display:grid;gap:14px;box-shadow:0 20px 50px rgba(0,20,45,.35)}
+.modal-cx h3{margin:0;font-size:18px}
+.modal-cx p{margin:0;color:var(--tx2);white-space:pre-wrap}
+.modal-acoes{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.toasts{position:fixed;z-index:70;left:50%;bottom:16px;transform:translateX(-50%);display:grid;gap:8px;width:min(560px,calc(100% - 32px))}
+.toast{background:var(--azul-900);color:#fff;border-radius:10px;padding:11px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,20,45,.3);animation:sobe .25s var(--ease)}
+.toast.erro{background:#5b1410}
+.toast button{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:6px;padding:5px 10px;font-weight:600}
+@keyframes sobe{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.carregando{display:grid;place-items:center;gap:10px;padding:60px 16px;color:var(--tx2)}
+.giro{width:28px;height:28px;border-radius:50%;border:3px solid var(--ln);border-top-color:var(--azul);animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+
+/* ---------- telas menores ---------- */
+@media (max-width:1100px){
+  .grade{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .grade .c3{grid-column:span 2}.grade .c6{grid-column:span 4}
+}
+@media (max-width:900px){
+  .kpis,.resumo{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .passos3{grid-template-columns:1fr}
+  .rolagem{max-height:none}
+  .tab thead{display:none}
+  .tab,.tab tbody,.tab tr,.tab td{display:block;width:100%}
+  .tab tbody{display:grid;gap:0}
+  .tab tr{padding:10px 14px;border-bottom:1px solid var(--ln)}
+  .tab td{border:0;padding:2px 0}
+  .tab td[data-l]::before{content:attr(data-l) ": ";color:var(--tx3);font-size:12px;font-weight:600}
+  .tab td.prim{font-weight:700;font-size:15px}
+  .tab td.prim::before{display:none}
+  .tab .corta{max-width:none}
+}
+@media (max-width:640px){
+  .topo-in{grid-template-columns:1fr auto;padding:8px 12px 0}
+  .marca img{height:24px}
+  .marca-tx{display:none}
+  .usuario span{display:none}
+  .topo-dir .bt-painel{display:none}
+  main{padding:12px 12px 32px}
+  .grade{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grade .c1,.grade .c2,.grade .c3,.grade .c4,.grade .c6{grid-column:span 2}
+  .kpi b,.rcard b{font-size:22px}
+  .barra .bt.pri{margin-left:0;flex:1 1 100%}
+  .barra select{flex:1 1 calc(50% - 4px)}
+  .chk{flex:1 1 100%}
+  .dif-campo{grid-template-columns:1fr}
+  .gav-pe .bt{flex:1 1 auto}
+  .acoes-imp{margin:0 -12px;padding-left:12px;padding-right:12px}
+  .acoes-imp .bt{flex:1 1 auto}
+  .acoes-imp .esp{display:none}
+  .lote-cab .id{margin-left:0}
+  .vagas thead{display:none}
+  .vagas,.vagas tbody,.vagas tr,.vagas td{display:block;width:100%}
+  .vagas tr{padding:8px 0;border-bottom:1px solid var(--ln)}
+  .vagas td{border:0;padding:2px 0}
+  .vagas td.r{text-align:left;white-space:normal}
+  .vagas td[data-l]::before{content:attr(data-l) ": ";color:var(--tx3);font-size:12px;font-weight:600}
+  .leitura dl{grid-template-columns:1fr;gap:2px}
+  .leitura dl dd{margin-bottom:6px}
+}
+@media (max-width:380px){
+  .kpis,.resumo{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi,.rcard{padding:10px}
+  .kpi b,.rcard b{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ======================= LOGIN ======================= -->
+<section class="login" id="telaLogin" hidden>
+  <form class="login-cx" id="formLogin" autocomplete="on">
+    <img src="marca-confea-crea.png" alt="Confea e Crea" width="696" height="120">
+    <div>
+      <h1>Confea Valoriza</h1>
+      <p>Administração da base de processos. Entre com seu usuário e sua senha.</p>
+    </div>
+    <label class="campo"><span>Usuário</span><input name="usuario" autocomplete="username" required autocapitalize="none" spellcheck="false"></label>
+    <label class="campo"><span>Senha</span><input name="senha" type="password" autocomplete="current-password" required></label>
+    <div class="login-msg" id="loginMsg" role="alert"></div>
+    <button class="bt pri" type="submit" id="btEntrar">Entrar</button>
+  </form>
+</section>
+
+<!-- ======================= APLICAÇÃO ======================= -->
+<div class="app" id="app" hidden>
+  <header class="topo" id="topo">
+    <div class="topo-in">
+      <div class="marca">
+        <img src="marca-confea-crea.png" alt="Confea e Crea" width="696" height="120">
+        <div class="marca-tx"><span>Confea Valoriza</span><b>Administração da base</b></div>
+      </div>
+      <div class="topo-dir">
+        <a class="bt leve bt-painel" href="../" target="_blank" rel="noopener">Ver painel</a>
+        <div class="usuario"><i id="iniciais">F</i><span id="nomeUsuario"></span></div>
+        <button class="bt" id="btSair" type="button">Sair</button>
+      </div>
+      <nav class="abas" role="tablist" aria-label="Seções">
+        <button class="aba" role="tab" data-vista="processos" aria-selected="true">Processos<span class="cont" id="contProc">0</span></button>
+        <button class="aba" role="tab" data-vista="importar" aria-selected="false">Importar planilha</button>
+        <button class="aba" role="tab" data-vista="historico" aria-selected="false">Histórico</button>
+      </nav>
+    </div>
+    <i class="linha-viva"></i>
+  </header>
+
+  <main>
+    <!-- ---------- PROCESSOS ---------- -->
+    <section class="vista" id="v-processos" aria-label="Processos">
+      <div class="kpis">
+        <div class="kpi"><span>Processos</span><b id="kProc">0</b><small>na base</small></div>
+        <div class="kpi ouro"><span>Vagas</span><b id="kVagas">0</b><small>um salário é uma vaga</small></div>
+        <div class="kpi alerta"><span>Abaixo do piso</span><b id="kAbaixo">0</b><small id="kAbaixoPct">das vagas com piso</small></div>
+        <div class="kpi"><span>Apontamentos</span><b id="kAvisos">0</b><small>itens para conferir</small></div>
+      </div>
+      <div class="barra">
+        <label class="busca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="fBusca" type="search" placeholder="Buscar por Nº, processo, cidade, órgão ou cargo" aria-label="Buscar"></label>
+        <select id="fUF" aria-label="Estado"><option value="">Todos os estados</option></select>
+        <select id="fSit" aria-label="Situação"><option value="">Todas as situações</option></select>
+        <label class="chk"><input type="checkbox" id="fAvisos"> Só com apontamentos</label>
+        <button class="bt pri" id="btNovo" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Novo processo</button>
+      </div>
+      <div class="quadro">
+        <div class="quadro-info"><span id="infoLista">Carregando…</span><span>Clique em um processo para ver, alterar ou remover.</span></div>
+        <div class="rolagem">
+          <table class="tab" id="tabProc">
+            <thead><tr>
+              <th><button data-ord="numero">Nº</button></th>
+              <th><button data-ord="processo">Processo administrativo</button></th>
+              <th><button data-ord="cidade">Cidade</button></th>
+              <th><button data-ord="orgao">Órgão</button></th>
+              <th><button data-ord="sit">Situação</button></th>
+              <th><button data-ord="vagas">Vagas</button></th>
+              <th><button data-ord="avisos">Apontamentos</button></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="vazio" id="semResultado" hidden>Nenhum processo corresponde aos filtros.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- IMPORTAR ---------- -->
+    <section class="vista" id="v-importar" aria-label="Importar planilha" hidden>
+      <div class="cab"><div><h2>Importar planilha</h2>
+        <p>Envie a planilha do Confea Valoriza como ela está. O sistema compara cada linha com a base pela coluna Nº, mostra o que é novo e o que mudou, e só grava depois da sua confirmação.</p></div></div>
+      <div id="impInicio" class="vista">
+        <label class="solta" id="solta" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3"/></svg>
+          <b>Arraste a planilha para cá ou clique para escolher</b>
+          <p>Arquivo .xlsx no formato da planilha "Processos Confea Valoriza". Nada é gravado nesta etapa.</p>
+          <input type="file" id="arquivo" accept=".xlsx,.xlsm,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+        </label>
+        <div class="passos3">
+          <div class="passo3"><em>01</em><b>Conferência</b><p>O sistema lê a planilha, ajusta espaços e formatos e compara com a base.</p></div>
+          <div class="passo3"><em>02</em><b>Revisão</b><p>Você vê os processos novos, os alterados campo a campo e os que não estão na planilha.</p></div>
+          <div class="passo3"><em>03</em><b>Gravação</b><p>Ao confirmar, tudo é gravado de uma vez, com registro no histórico e opção de desfazer.</p></div>
+        </div>
+      </div>
+      <div id="impAnalise" class="analise" hidden aria-live="polite">
+        <ul id="impPassos"></ul>
+        <div class="barrinha"><b id="impBarra"></b></div>
+      </div>
+      <div id="impResultado" class="vista" hidden></div>
+    </section>
+
+    <!-- ---------- HISTÓRICO ---------- -->
+    <section class="vista" id="v-historico" aria-label="Histórico" hidden>
+      <div class="cab"><div><h2>Histórico</h2>
+        <p>Cada gravação forma um lote: importação, inclusão, alteração ou remoção. Use "Desfazer" para voltar a base ao estado anterior ao lote.</p></div>
+        <select id="fHist" aria-label="Mostrar">
+          <option value="lotes">Alterações na base</option>
+          <option value="acessos">Entradas e saídas</option>
+        </select>
+      </div>
+      <div class="lotes" id="listaLotes"></div>
+      <button class="bt" id="maisLotes" type="button" hidden>Mostrar mais</button>
+    </section>
+  </main>
+</div>
+
+<!-- ======================= EDITOR ======================= -->
+<div class="veu" id="veu" hidden></div>
+<aside class="gaveta" id="gaveta" hidden aria-modal="true" role="dialog" aria-labelledby="gavTitulo">
+  <div class="gav-cab">
+    <div><h3 id="gavTitulo">Processo</h3><small id="gavSub"></small></div>
+    <button class="bt leve" id="gavFechar" type="button" aria-label="Fechar">Fechar</button>
+  </div>
+  <form class="gav-corpo" id="formProc" novalidate>
+    <div class="aviso-topo" id="gavMudou" hidden><span>Este processo foi alterado por outra pessoa enquanto você editava.</span><button class="bt" type="button" id="gavRecarregar">Ver a versão atual</button></div>
+    <div class="bloco">
+      <h4>Dados do processo</h4>
+      <div class="grade">
+        <label class="campo c1"><span>Nº</span><input name="numero" inputmode="numeric" required><span class="msg"></span></label>
+        <label class="campo c3"><span>Nº do processo administrativo</span><input name="processo" required><span class="msg"></span></label>
+        <label class="campo c2"><span>Regime jurídico</span><input name="regime" list="listaRegimes"><span class="msg"></span></label>
+        <label class="campo c4"><span>Cidade</span><input name="cidade"><span class="msg"></span></label>
+        <label class="campo c2"><span>Estado (UF)</span><input name="estado" maxlength="2" autocapitalize="characters" list="listaUFs"><span class="msg"></span></label>
+        <label class="campo c6"><span>Órgão público</span><input name="orgao"><span class="msg"></span></label>
+      </div>
+    </div>
+    <div class="bloco">
+      <h4>Cargos, jornada e salário</h4>
+      <div class="grade">
+        <label class="campo c6"><span>Cargo da área tecnológica</span><textarea name="cargo" rows="2"></textarea><span class="ajuda">Separe os cargos com ponto e vírgula, vírgula ou "e".</span></label>
+        <label class="campo c3"><span>Jornada semanal</span><textarea name="jornada" rows="2"></textarea><span class="ajuda">Ex.: 40h; ou "Engenheiro Civil: 40h; Engenheiro Agrônomo: 20h".</span></label>
+        <label class="campo c3"><span>Salário</span><textarea name="salario" rows="2"></textarea><span class="ajuda">Ex.: R$ 6.926,40; R$ 9.020,72. Cada valor é uma vaga.</span></label>
+      </div>
+    </div>
+    <div class="bloco">
+      <h4>Situação e ação judicial</h4>
+      <div class="grade">
+        <label class="campo c6"><span>Status</span><textarea name="status" rows="2"></textarea></label>
+        <label class="campo c3"><span>Nº do processo judicial (mandado de segurança)</span><input name="judicial"></label>
+        <label class="campo c3"><span>Comarca do processo judicial</span><input name="comarca"></label>
+        <label class="campo c6"><span>Desdobramento</span><textarea name="desdobramento" rows="2"></textarea></label>
+      </div>
+    </div>
+    <div class="bloco" id="blocoExtras" hidden><h4>Outras colunas da planilha</h4><div class="extras" id="extras"></div></div>
+    <div class="bloco">
+      <h4>Leitura do sistema</h4>
+      <div class="leitura" id="leitura"></div>
+    </div>
+  </form>
+  <div class="gav-pe">
+    <button class="bt perigo" type="button" id="gavRemover">Remover</button>
+    <span class="esp"></span>
+    <button class="bt" type="button" id="gavCancelar">Cancelar</button>
+    <button class="bt pri" type="button" id="gavSalvar">Salvar</button>
+  </div>
+</aside>
+<datalist id="listaUFs"></datalist>
+<datalist id="listaRegimes"><option value="Estatutário"><option value="Celetista"><option value="Contrato Temporário"></datalist>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTit">
+  <div class="modal-cx"><h3 id="modalTit"></h3><p id="modalTx"></p><div class="modal-acoes" id="modalAcoes"></div></div>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =========================================================================
+   Administração do Confea Valoriza
+   Banco: Supabase rmjlqngrfgorhcwaarou, schema caged. Toda gravação passa
+   pelas funções do banco (valoriza_importar, valoriza_salvar,
+   valoriza_excluir, valoriza_reverter), que abrem um lote no histórico.
+   ========================================================================= */
+const SUPABASE_URL = 'https://rmjlqngrfgorhcwaarou.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtamxxbmdyZmdvcmhjd2Fhcm91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NTI4NjIsImV4cCI6MjEwMjEyODg2Mn0.sQazP8j9mxG7iXP66_2PXWZmE7sSCk0KXcu_SLs4H_c';
+const DOMINIO = 'cnfpresiddata.local';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { db: { schema: 'caged' }, auth: { persistSession: true, autoRefreshToken: true } });
+const V = window.Valoriza;
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const nf = new Intl.NumberFormat('pt-BR');
+const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const esc = s => String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pl = (n, um, varios) => `${nf.format(n)} ${n === 1 ? um : varios}`;
+const quando = t => t ? new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+const UFS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
+
+const E = { perfil: null, linhas: [], porId: new Map(), leituras: new Map(), ibge: null, I: null, ord: ['numero', 1],
+  editando: null, canal: null, lotesPag: 0, recarga: null, imp: null, vista: 'processos' };
+
+/* ---------------- utilidades de interface ---------------- */
+function toast(msg, acao, erro){
+  const t = document.createElement('div'); t.className = 'toast' + (erro ? ' erro' : '');
+  const s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+  if (acao){ const b = document.createElement('button'); b.type = 'button'; b.textContent = acao.rotulo; b.onclick = () => { t.remove(); acao.fazer(); }; t.appendChild(b); }
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), acao ? 9000 : 4500);
+}
+function perguntar(titulo, texto, botoes){
+  return new Promise(ok => {
+    const m = $('#modal'); $('#modalTit').textContent = titulo; $('#modalTx').textContent = texto;
+    const box = $('#modalAcoes'); box.innerHTML = '';
+    const fechar = v => { m.hidden = true; document.removeEventListener('keydown', tecla); ok(v); };
+    const tecla = e => { if (e.key === 'Escape') fechar(null); };
+    botoes.forEach(b => { const el = document.createElement('button'); el.type = 'button'; el.className = 'bt ' + (b.classe || ''); el.textContent = b.rotulo; el.onclick = () => fechar(b.valor); box.appendChild(el); });
+    m.hidden = false; document.addEventListener('keydown', tecla);
+    (box.querySelector('.pri,.perigo') || box.lastChild).focus();
+  });
+}
+const avisar = (titulo, texto) => perguntar(titulo, texto, [{ rotulo: 'Entendi', valor: true, classe: 'pri' }]);
+function ocupado(sim){ $('#topo').classList.toggle('ocupado', !!sim); }
+function contar(el, alvo){
+  const ini = Number(el.dataset.v || 0); el.dataset.v = alvo;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || ini === alvo){ el.textContent = nf.format(alvo); return; }
+  const t0 = performance.now(), dur = 600;
+  const f = now => { const p = Math.min(1, (now - t0) / dur); el.textContent = nf.format(Math.round(ini + (alvo - ini) * (1 - Math.pow(1 - p, 3)))); if (p < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+}
+function msgErro(e){
+  const m = (e && (e.message || e.error_description)) || String(e);
+  if (/Failed to fetch|NetworkError|fetch/i.test(m)) return 'Sem conexão com o banco de dados. Confira a internet e tente de novo.';
+  if (/JWT|token/i.test(m)) return 'Sua sessão expirou. Entre de novo.';
+  return m;
+}
+
+/* ---------------- login e sessão ---------------- */
+function telaLogin(msg){
+  $('#app').hidden = true; $('#telaLogin').hidden = false; fecharEditor(true);
+  $('#loginMsg').textContent = msg || '';
+  if (E.canal){ sb.removeChannel(E.canal); E.canal = null; }
+  setTimeout(() => $('#formLogin').usuario.focus(), 50);
+}
+$('#formLogin').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const f = ev.target, u = f.usuario.value.trim().toLowerCase();
+  if (!u || !f.senha.value) return;
+  $('#btEntrar').disabled = true; $('#loginMsg').textContent = '';
+  const email = u.includes('@') ? u : u + '@' + DOMINIO;
+  const { error } = await sb.auth.signInWithPassword({ email, password: f.senha.value });
+  $('#btEntrar').disabled = false;
+  if (error){ $('#loginMsg').textContent = /Invalid login/i.test(error.message) ? 'Usuário ou senha incorretos.' : msgErro(error); return; }
+  f.senha.value = '';
+  await entrar(true);
+});
+async function entrar(novo){
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return telaLogin();
+  const { data: perf, error } = await sb.rpc('meu_perfil');
+  if (error || !perf || !perf.length){ await sb.auth.signOut(); return telaLogin('Este usuário não tem acesso à administração do Confea Valoriza.'); }
+  E.perfil = perf[0];
+  if (novo) sb.rpc('registrar_acesso', { p_acao: 'entrou' });
+  $('#nomeUsuario').textContent = E.perfil.nome;
+  $('#iniciais').textContent = (E.perfil.nome || '?').trim().charAt(0).toUpperCase();
+  $('#telaLogin').hidden = true; $('#app').hidden = false;
+  await carregarTudo();
+  assinar();
+}
+$('#btSair').addEventListener('click', async () => {
+  try { await sb.rpc('registrar_acesso', { p_acao: 'saiu' }); } catch (e) {}
+  E.perfil = null; await sb.auth.signOut(); telaLogin('Você saiu do sistema.');
+});
+sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT' && E.perfil){ E.perfil = null; telaLogin('Sua sessão terminou. Entre de novo.'); } });
+
+/* ---------------- dados ---------------- */
+async function todasAsLinhas(){
+  const out = [];
+  for (let i = 0; ; i += 1000){
+    const { data, error } = await sb.from('valoriza_processos').select('*').order('numero').range(i, i + 999);
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < 1000) return out;
+  }
+}
+async function carregarIbge(){
+  if (E.I) return;
+  const { data, error } = await sb.from('blocos').select('dados').eq('chave', 'dims').maybeSingle();
+  if (error) throw error;
+  E.ibge = (data && data.dados && data.dados.ibge) || [];
+  E.I = V.indiceIbge(E.ibge);
+}
+async function carregarTudo(){
+  ocupado(true);
+  try {
+    const [linhas] = await Promise.all([todasAsLinhas(), carregarIbge()]);
+    aplicarLinhas(linhas);
+  } catch (e){ toast(msgErro(e), { rotulo: 'Tentar de novo', fazer: carregarTudo }, true); }
+  ocupado(false);
+}
+function aplicarLinhas(linhas, mudados){
+  E.linhas = linhas; E.porId = new Map(linhas.map(l => [l.id, l])); E.leituras = new Map();
+  for (const l of linhas) E.leituras.set(l.id, V.lerProcesso(l, E.I));
+  const r = V.montarCubo(linhas, E.ibge || []);
+  contar($('#kProc'), r.meta.vlz_processos); contar($('#kVagas'), r.meta.vlz_vagas);
+  contar($('#kAbaixo'), r.meta.vlz_abaixo); contar($('#kAvisos'), r.meta.vlz_avisos);
+  const comPiso = r.cubo.piso.filter(Boolean).length;
+  $('#kAbaixoPct').textContent = comPiso ? `${nf.format(Math.round(1000 * r.meta.vlz_abaixo / comPiso) / 10)}% das ${nf.format(comPiso)} vagas com piso` : 'das vagas com piso';
+  $('#contProc').textContent = nf.format(linhas.length);
+  const ufs = Array.from(new Set(linhas.map(l => l.estado).filter(Boolean))).sort();
+  preencherSelect($('#fUF'), ufs, 'Todos os estados');
+  const sits = Array.from(new Set(Array.from(E.leituras.values()).map(p => p.situacao).filter(Boolean))).sort();
+  preencherSelect($('#fSit'), sits, 'Todas as situações');
+  desenharLista(mudados);
+}
+function preencherSelect(sel, valores, todos){
+  const atual = sel.value;
+  sel.innerHTML = `<option value="">${todos}</option>` + valores.map(v => `<option>${esc(v)}</option>`).join('');
+  if (valores.includes(atual)) sel.value = atual;
+}
+const corSit = s => /Êxito/.test(s) ? 'verde' : /Judicializado/.test(s) ? 'azul' : /Ofício|Recomenda/.test(s) ? 'ouro' : /Perda|Não postulado/.test(s) ? '' : 'amb';
+
+/* ---------------- lista de processos ---------------- */
+function linhasFiltradas(){
+  const q = V._int.vsa($('#fBusca').value).trim();
+  const uf = $('#fUF').value, sit = $('#fSit').value, soAv = $('#fAvisos').checked;
+  const termos = q ? q.split(' ') : [];
+  return E.linhas.filter(l => {
+    const p = E.leituras.get(l.id);
+    if (uf && l.estado !== uf) return false;
+    if (sit && (!p || p.situacao !== sit)) return false;
+    if (soAv && !(p && p.avisos.length)) return false;
+    if (termos.length){
+      const alvo = V._int.vsa([l.numero, l.processo, l.cidade, l.estado, l.orgao, l.cargo, l.status, l.judicial].join(' '));
+      if (!termos.every(t => alvo.includes(t))) return false;
+    }
+    return true;
+  });
+}
+function chaveOrd(l, c){
+  const p = E.leituras.get(l.id) || { vagas: [], avisos: [] };
+  if (c === 'numero') return l.numero;
+  if (c === 'vagas') return p.vagas.length;
+  if (c === 'avisos') return p.avisos.length;
+  if (c === 'sit') return p.situacao || '';
+  return V._int.vsa(l[c] || '');
+}
+function desenharLista(mudados){
+  const [c, dir] = E.ord;
+  const ls = linhasFiltradas().sort((a, b) => { const x = chaveOrd(a, c), y = chaveOrd(b, c); return (x < y ? -1 : x > y ? 1 : a.numero - b.numero) * dir; });
+  $('#infoLista').textContent = ls.length === E.linhas.length ? `${nf.format(ls.length)} processos` : `${nf.format(ls.length)} de ${nf.format(E.linhas.length)} processos`;
+  $('#semResultado').hidden = ls.length > 0;
+  $$('#tabProc th button').forEach(b => { b.textContent = b.textContent.replace(/ [▲▼]$/, ''); if (b.dataset.ord === c) b.textContent += dir > 0 ? ' ▲' : ' ▼'; });
+  const tb = $('#tabProc tbody');
+  tb.innerHTML = ls.map(l => {
+    const p = E.leituras.get(l.id) || { vagas: [], avisos: [] };
+    const ab = p.vagas.filter(v => v.piso && v.salario < v.piso).length;
+    return `<tr data-id="${l.id}"${mudados && mudados.has(l.id) ? ' class="mudou"' : ''} tabindex="0">
+      <td class="n prim">Nº ${l.numero}</td>
+      <td class="n" data-l="Processo">${esc(l.processo)}</td>
+      <td data-l="Cidade">${esc(l.cidade || '')}${l.estado ? '/' + esc(l.estado) : ''}</td>
+      <td data-l="Órgão"><span class="corta" title="${esc(l.orgao)}">${esc(l.orgao || '')}</span></td>
+      <td data-l="Situação"><span class="selo ${corSit(p.situacao || '')}">${esc(p.situacao || '')}</span></td>
+      <td class="n" data-l="Vagas">${p.vagas.length}${ab ? ` <span class="sub">${ab} abaixo do piso</span>` : ''}</td>
+      <td data-l="Apontamentos">${p.avisos.length ? `<span class="selo amb">${p.avisos.length}</span>` : '<span class="sub">nenhum</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+$('#tabProc tbody').addEventListener('click', e => { const tr = e.target.closest('tr[data-id]'); if (tr) abrirEditor(Number(tr.dataset.id)); });
+$('#tabProc tbody').addEventListener('keydown', e => { if (e.key === 'Enter'){ const tr = e.target.closest('tr[data-id]'); if (tr) abrirEditor(Number(tr.dataset.id)); } });
+$$('#tabProc th button').forEach(b => b.addEventListener('click', () => { const c = b.dataset.ord; E.ord = [c, E.ord[0] === c ? -E.ord[1] : 1]; desenharLista(); }));
+let tBusca; $('#fBusca').addEventListener('input', () => { clearTimeout(tBusca); tBusca = setTimeout(() => desenharLista(), 120); });
+['#fUF', '#fSit', '#fAvisos'].forEach(s => $(s).addEventListener('change', () => desenharLista()));
+
+/* ---------------- editor ---------------- */
+const F = () => $('#formProc');
+function valoresForm(){
+  const f = F(), o = {};
+  for (const c of V.CAMPOS) o[c] = f.elements[c] ? f.elements[c].value : null;
+  o.extras = E.editando && E.editando.extras ? E.editando.extras : {};
+  return o;
+}
+function abrirEditor(id){
+  const l = id ? E.porId.get(id) : null;
+  if (id && !l) return toast('Este processo não existe mais.', null, true);
+  const prox = E.linhas.reduce((m, x) => Math.max(m, x.numero), 0) + 1;
+  E.editando = l ? Object.assign({}, l) : { id: null, numero: prox, extras: null };
+  const f = F(); f.reset();
+  for (const c of V.CAMPOS) if (f.elements[c]) f.elements[c].value = E.editando[c] === null || E.editando[c] === undefined ? '' : E.editando[c];
+  $$('#formProc .campo').forEach(c => { c.classList.remove('erro'); const m = c.querySelector('.msg'); if (m) m.textContent = ''; });
+  $('#gavTitulo').textContent = l ? `Processo ${l.processo}` : 'Novo processo';
+  $('#gavSub').textContent = l ? `Nº ${l.numero} · última gravação em ${quando(l.atualizado_em)}` : 'Preencha pelo menos o Nº e o Nº do processo administrativo.';
+  $('#gavRemover').hidden = !l; $('#gavMudou').hidden = true;
+  const ex = E.editando.extras || {};
+  $('#blocoExtras').hidden = !Object.keys(ex).length;
+  $('#extras').innerHTML = Object.entries(ex).map(([k, v]) => `<div><b>${esc(k)}:</b> ${esc(v)}</div>`).join('');
+  $('#veu').hidden = false; $('#gaveta').hidden = false;
+  requestAnimationFrame(() => { $('#veu').classList.add('ab'); $('#gaveta').classList.add('ab'); });
+  ajustarAlturas(); lerAoVivo();
+  setTimeout(() => f.elements[l ? 'cidade' : 'processo'].focus({ preventScroll: true }), 260);
+}
+function editorSujo(){
+  if (!E.editando) return false;
+  const { linha } = V.normalizarLinha(valoresForm());
+  return V.CAMPOS.some(c => (linha[c] === undefined ? null : linha[c]) !== (E.editando[c] === undefined ? null : E.editando[c]));
+}
+async function fecharEditor(forcar){
+  if (!forcar && editorSujo()){
+    const r = await perguntar('Descartar as alterações?', 'Há mudanças neste processo que ainda não foram gravadas.', [{ rotulo: 'Continuar editando', valor: false }, { rotulo: 'Descartar', valor: true, classe: 'perigo' }]);
+    if (!r) return;
+  }
+  $('#veu').classList.remove('ab'); $('#gaveta').classList.remove('ab');
+  setTimeout(() => { $('#veu').hidden = true; $('#gaveta').hidden = true; }, 230);
+  E.editando = null;
+}
+function ajustarAlturas(){ $$('#formProc textarea').forEach(t => { t.style.height = 'auto'; t.style.height = Math.min(240, t.scrollHeight + 2) + 'px'; }); }
+let tLer;
+F().addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') ajustarAlturas(); clearTimeout(tLer); tLer = setTimeout(lerAoVivo, 150); });
+function lerAoVivo(){
+  const { linha, erros } = V.normalizarLinha(valoresForm());
+  const box = $('#leitura');
+  if (!linha.numero) linha.numero = 0;
+  const p = V.lerProcesso(linha, E.I);
+  if (p.ignorado){ box.innerHTML = '<p class="sub">Informe a cidade ou o órgão para o sistema ler o processo.</p>'; return; }
+  const mun = p.casado ? `${esc(p.cidade)}/${esc(p.uf)} <span class="selo verde">código IBGE ${esc(p.mun)}</span>` : `<span class="selo amb">não localizado no IBGE</span>`;
+  const vagas = p.vagas.length ? `<div style="overflow:auto"><table class="vagas"><thead><tr><th>Cargo</th><th class="r">Salário</th><th class="r">Jornada</th><th class="r">Piso 4.950-A</th><th class="r">Diferença</th></tr></thead><tbody>${
+    p.vagas.map(v => { const ab = v.piso && v.salario < v.piso; return `<tr><td><b>${esc(v.cargo || 'não identificado')}</b></td><td class="r" data-l="Salário">${brl.format(v.salario)}</td><td class="r" data-l="Jornada">${v.horas ? nf.format(v.horas) + 'h' : 'n/d'}</td><td class="r" data-l="Piso">${v.piso ? brl.format(v.piso) : 'sem jornada'}</td><td class="r" data-l="Diferença">${v.piso ? `<span class="selo ${ab ? 'verm' : 'verde'}">${ab ? '−' + brl.format(v.piso - v.salario) : 'atende'}</span>` : ''}</td></tr>`; }).join('')
+  }</tbody></table></div>` : '<p class="sub">Nenhum salário lido: este processo não gera vaga no painel.</p>';
+  box.innerHTML = `<dl>
+      <dt>Município</dt><dd>${mun}</dd>
+      <dt>Situação</dt><dd><span class="selo ${corSit(p.situacao)}">${esc(p.situacao)}</span></dd>
+      <dt>Ação judicial</dt><dd>${esc(p.tribunal)}${p.jud && p.jud.ano ? ' · ' + esc(p.jud.ano) : ''}</dd>
+      <dt>Desdobramento</dt><dd>${esc(p.desdobramento)}</dd>
+      <dt>Órgão</dt><dd>${esc(p.tipo)} · esfera ${esc(p.esfera.toLowerCase())}</dd>
+    </dl>${vagas}${p.avisos.length ? `<ul class="apont">${p.avisos.map(a => `<li><b>${esc(a[1])}</b>${esc(a[2])}</li>`).join('')}</ul>` : '<span class="selo verde">Sem apontamentos</span>'}`;
+  marcarErros(erros);
+}
+function marcarErros(erros){
+  const f = F();
+  $$('#formProc .campo').forEach(c => { c.classList.remove('erro'); const m = c.querySelector('.msg'); if (m) m.textContent = ''; });
+  const alvo = e => /Nº do processo/.test(e) ? 'processo' : /Nº/.test(e) ? 'numero' : /Estado/.test(e) ? 'estado' : null;
+  for (const e of erros){ const c = alvo(e); if (!c) continue; const lab = f.elements[c].closest('.campo'); lab.classList.add('erro'); lab.querySelector('.msg').textContent = e; }
+}
+$('#gavFechar').addEventListener('click', () => fecharEditor());
+$('#gavCancelar').addEventListener('click', () => fecharEditor());
+$('#veu').addEventListener('click', () => fecharEditor());
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#gaveta').hidden && $('#modal').hidden) fecharEditor(); });
+$('#btNovo').addEventListener('click', () => abrirEditor(null));
+$('#gavRecarregar').addEventListener('click', () => { const id = E.editando && E.editando.id; fecharEditor(true); setTimeout(() => abrirEditor(id), 260); });
+
+$('#gavSalvar').addEventListener('click', async () => {
+  const { linha, erros } = V.normalizarLinha(valoresForm());
+  if (erros.length){ marcarErros(erros); toast('Corrija os campos marcados.', null, true); return; }
+  const id = E.editando.id;
+  if (E.linhas.some(l => l.numero === linha.numero && l.id !== id)) { marcarErros(['Nº ' + linha.numero + ' já é usado por outro processo']); return; }
+  $('#gavSalvar').disabled = true; ocupado(true);
+  const { data, error } = await sb.rpc('valoriza_salvar', { p_id: id, p_dados: linha, p_versao: id ? E.editando.atualizado_em : null });
+  $('#gavSalvar').disabled = false; ocupado(false);
+  if (error){ return avisar('Não foi possível gravar', msgErro(error)); }
+  fecharEditor(true);
+  if (!data.lote){ toast('Nada mudou neste processo.'); return; }
+  await recarregar(new Set([data.id]));
+  toast(id ? `Processo Nº ${linha.numero} gravado.` : `Processo Nº ${linha.numero} incluído.`, { rotulo: 'Desfazer', fazer: () => desfazer(data.lote, true) });
+});
+$('#gavRemover').addEventListener('click', async () => {
+  const l = E.editando; if (!l || !l.id) return;
+  const ok = await perguntar('Remover este processo?', `O processo ${l.processo} (Nº ${l.numero}) sai da base e do painel. A remoção fica no histórico e pode ser desfeita.`,
+    [{ rotulo: 'Cancelar', valor: false }, { rotulo: 'Remover', valor: true, classe: 'perigo' }]);
+  if (!ok) return;
+  ocupado(true);
+  const { data, error } = await sb.rpc('valoriza_excluir', { p_ids: [l.id] });
+  ocupado(false);
+  if (error) return avisar('Não foi possível remover', msgErro(error));
+  fecharEditor(true); await recarregar();
+  toast(`Processo Nº ${l.numero} removido.`, { rotulo: 'Desfazer', fazer: () => desfazer(data.lote, true) });
+});
+
+/* ---------------- desfazer (reverter lote) ---------------- */
+async function desfazer(lote, direto){
+  if (!direto){
+    const ok = await perguntar('Desfazer este lote?', 'A base volta ao estado anterior a este lote. A reversão também fica no histórico e pode ser desfeita.',
+      [{ rotulo: 'Cancelar', valor: false }, { rotulo: 'Desfazer', valor: true, classe: 'pri' }]);
+    if (!ok) return false;
+  }
+  ocupado(true);
+  const { data, error } = await sb.rpc('valoriza_reverter', { p_lote: lote });
+  ocupado(false);
+  if (error){ await avisar('Não foi possível desfazer', msgErro(error)); return false; }
+  await recarregar();
+  if (E.vista === 'historico') carregarLotes(true);
+  toast(`Lote ${lote} desfeito (${data.operacoes} ${data.operacoes === 1 ? 'operação' : 'operações'}).`);
+  return true;
+}
+async function recarregar(mudados){
+  try { aplicarLinhas(await todasAsLinhas(), mudados); } catch (e){ toast(msgErro(e), null, true); }
+}
+
+/* ---------------- tempo real ---------------- */
+function assinar(){
+  if (E.canal) sb.removeChannel(E.canal);
+  E.canal = sb.channel('caged-adm')
+    .on('postgres_changes', { event: '*', schema: 'caged', table: 'valoriza_processos' }, p => {
+      const id = (p.new && p.new.id) || (p.old && p.old.id);
+      if (E.editando && E.editando.id && id === E.editando.id && p.new && p.new.atualizado_em !== E.editando.atualizado_em) $('#gavMudou').hidden = false;
+      clearTimeout(E.recarga);
+      E.recarga = setTimeout(() => recarregar(new Set(id ? [id] : [])), 500);
+    })
+    .on('postgres_changes', { event: '*', schema: 'caged', table: 'valoriza_lotes' }, () => { if (E.vista === 'historico') carregarLotes(true); })
+    .subscribe();
+}
+
+/* ---------------- abas ---------------- */
+function mostrar(v){
+  E.vista = v;
+  $$('.aba').forEach(a => a.setAttribute('aria-selected', String(a.dataset.vista === v)));
+  for (const n of ['processos', 'importar', 'historico']) $('#v-' + n).hidden = n !== v;
+  if (v === 'historico') carregarLotes(true);
+  window.scrollTo({ top: 0 });
+}
+$$('.aba').forEach(a => a.addEventListener('click', () => mostrar(a.dataset.vista)));
+
+/* ---------------- importação ---------------- */
+const solta = $('#solta');
+solta.addEventListener('click', e => { if (e.target.id !== 'arquivo') $('#arquivo').click(); });
+solta.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('#arquivo').click(); } });
+['dragenter', 'dragover'].forEach(t => solta.addEventListener(t, e => { e.preventDefault(); solta.classList.add('sobre'); }));
+['dragleave', 'drop'].forEach(t => solta.addEventListener(t, e => { e.preventDefault(); solta.classList.remove('sobre'); }));
+solta.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) analisar(f); });
+$('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; if (f) analisar(f); e.target.value = ''; });
+
+const PASSOS = ['Lendo o arquivo', 'Conferindo as colunas', 'Normalizando as linhas', 'Comparando com a base', 'Lendo vagas e apontamentos'];
+function passoImp(i, extra){
+  $('#impPassos').innerHTML = PASSOS.map((p, k) => `<li class="${k < i ? 'feito' : k === i ? 'atual' : ''}"><span>${p}</span><span>${k === i && extra ? esc(extra) : ''}</span></li>`).join('');
+  $('#impBarra').style.width = Math.round(100 * i / PASSOS.length) + '%';
+}
+const pausa = () => new Promise(r => setTimeout(r, 90));
+async function sha256(buf){ const h = await crypto.subtle.digest('SHA-256', buf); return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+const igualCampo = (a, b) => (a === undefined ? null : a) === (b === undefined ? null : b);
+const canonEx = o => o && Object.keys(o).length ? JSON.stringify(Object.keys(o).sort().map(k => [k, o[k]])) : 'null';
+const igualExtras = (a, b) => canonEx(a) === canonEx(b);
+// lê a primeira aba célula a célula: número, texto, data e erro do Excel como aparecem na planilha
+function lerAba(ws){
+  if (!ws || !ws['!ref']) return [];
+  const R = XLSX.utils.decode_range(ws['!ref']), out = [];
+  for (let r = R.s.r; r <= R.e.r; r++){
+    const linha = [];
+    for (let c = R.s.c; c <= R.e.c; c++){
+      const cel = ws[XLSX.utils.encode_cell({ r, c })];
+      let v = null;
+      if (cel && cel.v !== undefined && cel.v !== null){
+        if (cel.t === 'e') v = cel.w || '#ERRO';
+        else if (cel.t === 'b') v = cel.v ? 'VERDADEIRO' : 'FALSO';
+        else v = cel.v;
+      }
+      linha.push(v);
+    }
+    out.push(linha);
+  }
+  return out;
+}
+
+async function analisar(arq){
+  $('#impInicio').hidden = true; $('#impResultado').hidden = true; $('#impAnalise').hidden = false; ocupado(true);
+  try {
+    passoImp(0, (arq.size / 1024).toFixed(0) + ' KB'); await pausa();
+    if (arq.size > 10 * 1024 * 1024) throw new Error('O arquivo tem mais de 10 MB. Confira se é a planilha certa.');
+    const buf = await arq.arrayBuffer();
+    const hash = await sha256(buf);
+    let wb;
+    try { wb = XLSX.read(buf, { type: 'array', cellDates: true, cellNF: false }); }
+    catch (e) { throw new Error('Não consegui ler o arquivo. Envie uma planilha do Excel (.xlsx).'); }
+    const aba = wb.SheetNames[0];
+    const brutas = lerAba(wb.Sheets[aba]);
+    passoImp(1, `aba "${aba}"`); await pausa();
+    const cab = (brutas[0] || []).map(h => h === null ? '' : String(h));
+    const campos = cab.map(h => V.campoDoCabecalho(h));
+    const faltam = ['numero', 'processo', 'cidade', 'estado', 'orgao', 'salario'].filter(c => !campos.includes(c));
+    if (faltam.length) throw new Error('A planilha não tem as colunas: ' + faltam.map(c => V.ROTULOS[c]).join(', ') + '. Confira se a primeira linha é a do cabeçalho.');
+    const dup = campos.filter((c, i) => c && campos.indexOf(c) !== i);
+    if (dup.length) throw new Error('Coluna repetida no cabeçalho: ' + dup.map(c => V.ROTULOS[c]).join(', ') + '.');
+    const extrasCab = cab.map((h, i) => !campos[i] && h.trim() ? i : -1).filter(i => i >= 0);
+    passoImp(2, `${nf.format(brutas.length - 1)} linhas`); await pausa();
+    const linhas = [], erros = [], vistos = new Map();
+    for (let i = 1; i < brutas.length; i++){
+      const r = brutas[i] || [];
+      if (r.every(v => v === null || String(v).trim() === '')) continue;
+      const bruta = { extras: {} };
+      cab.forEach((h, j) => { const v = r[j] === undefined ? null : r[j]; if (campos[j]) bruta[campos[j]] = v; else if (extrasCab.includes(j)) bruta.extras[h.trim()] = v; });
+      const { linha, erros: e } = V.normalizarLinha(bruta);
+      linha._linhaExcel = i + 1;
+      if (e.length) erros.push(`Linha ${i + 1} do Excel: ${e.join('; ')}.`);
+      if (linha.numero){
+        if (vistos.has(linha.numero)) erros.push(`Nº ${linha.numero} aparece nas linhas ${vistos.get(linha.numero)} e ${i + 1} do Excel. Cada processo precisa de um Nº próprio.`);
+        else vistos.set(linha.numero, i + 1);
+      }
+      linhas.push(linha);
+    }
+    if (!linhas.length) throw new Error('A planilha não tem linhas de dados abaixo do cabeçalho.');
+    passoImp(3, `${nf.format(E.linhas.length)} na base`); await pausa();
+    const base = new Map(E.linhas.map(l => [l.numero, l]));
+    const noArquivo = new Set(linhas.map(l => l.numero));
+    const novos = [], alterados = [], iguais = [];
+    for (const l of linhas){
+      if (!l.numero) continue;
+      const b = base.get(l.numero);
+      if (!b){ novos.push(l); continue; }
+      const dif = V.CAMPOS.filter(c => c !== 'numero' && !igualCampo(l[c], b[c]));
+      if (!igualExtras(l.extras, b.extras)) dif.push('extras');
+      if (dif.length) alterados.push({ l, b, dif }); else iguais.push(l);
+    }
+    const fora = E.linhas.filter(b => !noArquivo.has(b.numero));
+    // avisos de conferência
+    const avisos = [];
+    const porProc = new Map();
+    for (const l of linhas) if (l.processo){ if (!porProc.has(l.processo)) porProc.set(l.processo, []); porProc.get(l.processo).push(l.numero); }
+    const rep = Array.from(porProc.entries()).filter(([, ns]) => ns.length > 1);
+    if (rep.length) avisos.push(`${rep.length} ${rep.length === 1 ? 'processo administrativo aparece' : 'processos administrativos aparecem'} em mais de uma linha: ` + rep.slice(0, 8).map(([p, ns]) => `${p} (Nº ${ns.join(', ')})`).join('; ') + (rep.length > 8 ? '; e outros.' : '.'));
+    const procBase = new Map(E.linhas.map(b => [b.processo, b.numero]));
+    const renum = alterados.filter(a => a.dif.includes('processo') && procBase.has(a.l.processo) && procBase.get(a.l.processo) !== a.l.numero);
+    if (renum.length) avisos.push(`${renum.length} ${renum.length === 1 ? 'linha mudou' : 'linhas mudaram'} o processo administrativo para um que já existe na base com outro Nº (${renum.slice(0, 6).map(a => 'Nº ' + a.l.numero).join(', ')}). Se a planilha foi renumerada, confira antes de aplicar: a comparação é feita pelo Nº.`);
+    if (fora.length && fora.length >= E.linhas.length / 2) avisos.push(`Mais da metade da base (${fora.length} processos) não está nesta planilha. Confira se é o arquivo completo.`);
+    passoImp(4); await pausa();
+    const leitura = V.montarCubo(linhas.filter(l => l.numero).sort((a, b) => a.numero - b.numero), E.ibge || []);
+    passoImp(5); await pausa();
+    E.imp = { arq, hash, aba, linhas, erros, avisos, novos, alterados, iguais, fora, leitura, extrasCab: extrasCab.map(i => cab[i].trim()), filtro: alterados.length ? 'alt' : novos.length ? 'novo' : fora.length ? 'fora' : 'igual' };
+    desenharImportacao();
+  } catch (e){
+    $('#impAnalise').hidden = true; $('#impInicio').hidden = false;
+    avisar('Não foi possível ler a planilha', msgErro(e));
+  }
+  ocupado(false);
+}
+function campoTexto(c, v){ if (c === 'extras') return v ? Object.entries(v).map(([k, x]) => `${k}: ${x}`).join('\n') : ''; return v === null || v === undefined ? '' : String(v); }
+function desenharImportacao(){
+  const I = E.imp, box = $('#impResultado');
+  $('#impAnalise').hidden = true; box.hidden = false;
+  const mudancas = I.novos.length + I.alterados.length;
+  const item = (k, cls, rot, n, sub) => `<button class="rcard ${cls}" data-f="${k}" aria-pressed="${I.filtro === k}" type="button"><span>${rot}</span><b>${nf.format(n)}</b><small>${sub}</small></button>`;
+  let lista = '';
+  if (I.filtro === 'alt'){
+    lista = I.alterados.length ? I.alterados.slice(0, 400).map(a => `<article class="dif-item"><header><b>Nº ${a.l.numero}</b><span>${esc(a.l.processo)}</span><span class="sub">${esc(a.l.cidade || '')}${a.l.estado ? '/' + esc(a.l.estado) : ''}</span></header>
+      <dl class="dif-campo">${a.dif.map(c => `<dt>${esc(c === 'extras' ? 'Outras colunas' : V.ROTULOS[c])}</dt><dd><span class="de">${esc(campoTexto(c, a.b[c])) || '(vazio)'}</span><span class="para">${esc(campoTexto(c, a.l[c])) || '(vazio)'}</span></dd>`).join('')}</dl></article>`).join('')
+      + (I.alterados.length > 400 ? `<p class="sub">E mais ${I.alterados.length - 400} processos alterados.</p>` : '') : '<div class="vazio">Nenhum processo alterado.</div>';
+  } else {
+    const ls = I.filtro === 'novo' ? I.novos : I.filtro === 'fora' ? I.fora : I.iguais;
+    lista = ls.length ? `<div class="quadro"><div class="rolagem" style="max-height:480px"><table class="tab"><thead><tr><th>Nº</th><th>Processo administrativo</th><th>Cidade</th><th>Órgão</th></tr></thead><tbody>${
+      ls.slice(0, 1000).map(l => `<tr><td class="n prim">Nº ${l.numero}</td><td class="n" data-l="Processo">${esc(l.processo)}</td><td data-l="Cidade">${esc(l.cidade || '')}${l.estado ? '/' + esc(l.estado) : ''}</td><td data-l="Órgão"><span class="corta">${esc(l.orgao || '')}</span></td></tr>`).join('')
+    }</tbody></table></div></div>` : '<div class="vazio">Nenhum processo neste grupo.</div>';
+  }
+  box.innerHTML = `
+    <div class="arquivo"><b>${esc(I.arq.name)}</b><span>${nf.format(Math.round(I.arq.size / 1024))} KB · aba "${esc(I.aba)}" · ${nf.format(I.linhas.length)} linhas de dados</span><code title="Impressão digital do arquivo (SHA-256)">${I.hash.slice(0, 16)}…</code></div>
+    <div class="resumo">
+      ${item('novo', 'novo', 'Novos', I.novos.length, 'entram na base')}
+      ${item('alt', 'alt', 'Alterados', I.alterados.length, 'mudam algum campo')}
+      ${item('igual', '', 'Sem alteração', I.iguais.length, 'iguais à base')}
+      ${item('fora', 'fora', 'Fora da planilha', I.fora.length, 'estão só na base')}
+    </div>
+    ${I.erros.length ? `<div class="painel-msg erro"><h4>Corrija na planilha antes de importar (${I.erros.length})</h4><ul>${I.erros.slice(0, 30).map(e => `<li>${esc(e)}</li>`).join('')}${I.erros.length > 30 ? `<li>E mais ${I.erros.length - 30}.</li>` : ''}</ul></div>` : ''}
+    ${I.avisos.length ? `<div class="painel-msg atencao"><h4>Pontos de atenção</h4><ul>${I.avisos.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+    ${I.extrasCab.length ? `<div class="painel-msg atencao"><h4>Colunas extras</h4><ul><li>As colunas ${I.extrasCab.map(c => '"' + esc(c) + '"').join(', ')} não fazem parte do modelo. Elas são guardadas em "Outras colunas" de cada processo, sem uso no painel.</li></ul></div>` : ''}
+    <div class="painel-msg ok"><h4>Leitura do painel com esta planilha</h4><ul><li>${esc(I.leitura.meta.vlz_msg)}</li></ul></div>
+    ${I.fora.length ? `<label class="chk" style="justify-self:start"><input type="checkbox" id="impRemover"> ${I.fora.length === 1 ? 'Remover da base o processo que não está' : `Remover da base os ${nf.format(I.fora.length)} processos que não estão`} nesta planilha</label>` : ''}
+    <div class="dif">${lista}</div>
+    <div class="acoes-imp">
+      <span id="impResumoAcao">${resumoAcao(false)}</span><span class="esp"></span>
+      <button class="bt" type="button" id="impCancelar">Escolher outro arquivo</button>
+      <button class="bt pri" type="button" id="impAplicar" ${I.erros.length ? 'disabled' : ''}>Aplicar importação</button>
+    </div>`;
+  box.querySelectorAll('.rcard').forEach(b => b.addEventListener('click', () => { I.filtro = b.dataset.f; desenharImportacao(); }));
+  const rem = $('#impRemover');
+  if (rem){ rem.checked = !!I.remover; rem.addEventListener('change', () => { I.remover = rem.checked; $('#impResumoAcao').textContent = resumoAcao(rem.checked); }); }
+  $('#impCancelar').addEventListener('click', resetImportacao);
+  $('#impAplicar').addEventListener('click', aplicarImportacao);
+  if (!mudancas && !(I.remover && I.fora.length)) $('#impAplicar').textContent = 'Registrar conferência';
+}
+function resumoAcao(rem){
+  const I = E.imp, r = rem ? I.fora.length : 0;
+  if (I.erros.length) return 'Há erros na planilha: nada pode ser gravado.';
+  if (!I.novos.length && !I.alterados.length && !r) return 'A planilha é igual à base.';
+  return `Vai gravar: ${pl(I.novos.length, 'novo', 'novos')}, ${pl(I.alterados.length, 'alterado', 'alterados')}, ${pl(r, 'removido', 'removidos')}.`;
+}
+function resetImportacao(){ E.imp = null; $('#impResultado').hidden = true; $('#impResultado').innerHTML = ''; $('#impAnalise').hidden = true; $('#impInicio').hidden = false; }
+async function aplicarImportacao(){
+  const I = E.imp; if (!I || I.erros.length) return;
+  const rem = !!I.remover && I.fora.length > 0;
+  if (rem){
+    const ok = await perguntar('Remover processos da base?', `${I.fora.length} processos que não estão nesta planilha vão sair da base e do painel. A importação pode ser desfeita no histórico.`,
+      [{ rotulo: 'Cancelar', valor: false }, { rotulo: 'Aplicar e remover', valor: true, classe: 'perigo' }]);
+    if (!ok) return;
+  }
+  const bt = $('#impAplicar'); bt.disabled = true; bt.textContent = 'Gravando…'; ocupado(true);
+  try {
+    const caminho = `valoriza/${I.hash}.xlsx`;
+    const ja = await sb.storage.from('caged').list('valoriza', { search: I.hash, limit: 1 });
+    if (!(ja.data && ja.data.some(o => o.name === I.hash + '.xlsx'))){
+      const up = await sb.storage.from('caged').upload(caminho, I.arq, { upsert: false, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      if (up.error && !/exists|Duplicate|already/i.test(up.error.message || '')) throw up.error;
+    }
+    const linhas = I.linhas.map(l => { const o = {}; for (const c of V.CAMPOS) o[c] = l[c] === undefined ? null : l[c]; o.extras = l.extras || null; return o; });
+    const { data, error } = await sb.rpc('valoriza_importar', {
+      p_linhas: linhas, p_remover_ausentes: rem,
+      p_arquivo: { nome: I.arq.name, sha256: I.hash, bytes: I.arq.size },
+      p_previa: { novos: I.novos.length, alterados: I.alterados.length, removidos: rem ? I.fora.length : 0 } });
+    if (error) throw error;
+    const mud = new Set();
+    await recarregar();
+    for (const l of I.novos.concat(I.alterados.map(a => a.l))){ const x = E.linhas.find(y => y.numero === l.numero); if (x) mud.add(x.id); }
+    desenharLista(mud);
+    $('#impResultado').innerHTML = `<div class="painel-msg ok"><h4>Importação gravada no lote ${data.lote}</h4><ul>
+      <li>${pl(data.novos, 'processo novo', 'processos novos')}, ${pl(data.alterados, 'alterado', 'alterados')}, ${pl(data.removidos, 'removido', 'removidos')} e ${nf.format(data.iguais)} sem alteração.</li>
+      <li>O painel público passa a usar estes dados na próxima vez que for aberto.</li></ul></div>
+      <div class="acoes-imp" style="position:static;margin:0;padding:0;background:none;border:0">
+        <button class="bt" type="button" id="impDesfazer">Desfazer esta importação</button>
+        <button class="bt" type="button" id="impOutra">Importar outra planilha</button>
+        <button class="bt pri" type="button" id="impVer">Ver processos</button></div>`;
+    $('#impDesfazer').addEventListener('click', async () => { if (await desfazer(data.lote)) resetImportacao(); });
+    $('#impOutra').addEventListener('click', resetImportacao);
+    $('#impVer').addEventListener('click', () => { resetImportacao(); mostrar('processos'); });
+    toast(`Importação gravada no lote ${data.lote}.`);
+    E.imp = null;
+  } catch (e){
+    bt.disabled = false; bt.textContent = 'Aplicar importação';
+    const m = msgErro(e);
+    if (/mudou desde a conferência/.test(m)){
+      await avisar('A base mudou', m + '\n\nO sistema vai conferir a planilha de novo.');
+      const arq = I.arq; await recarregar(); analisar(arq);
+    } else avisar('Não foi possível importar', m);
+  }
+  ocupado(false);
+}
+
+/* ---------------- histórico ---------------- */
+const ROT_TIPO = { importacao: ['Importação', 'azul'], inclusao: ['Inclusão', 'verde'], edicao: ['Alteração', 'ouro'], exclusao: ['Remoção', 'verm'], reversao: ['Reversão', ''] };
+async function carregarLotes(reinicia){
+  const box = $('#listaLotes');
+  if (reinicia){ E.lotesPag = 0; box.innerHTML = '<div class="carregando"><i class="giro"></i>Carregando o histórico…</div>'; }
+  const modo = $('#fHist').value;
+  const ini = E.lotesPag * 50;
+  if (modo === 'acessos'){
+    const { data, error } = await sb.from('historico').select('id,quando,usuario,acao,descricao').in('acao', ['entrou', 'saiu']).order('id', { ascending: false }).range(ini, ini + 49);
+    if (error){ box.innerHTML = `<div class="vazio">${esc(msgErro(error))}</div>`; return; }
+    if (reinicia) box.innerHTML = '';
+    box.insertAdjacentHTML('beforeend', data.length ? `<div class="lote"><ul class="eventos" style="border:0;padding:0;max-height:none">${data.map(e => `<li><time>${quando(e.quando)}</time><span>${esc(e.descricao)}</span></li>`).join('')}</ul></div>` : (reinicia ? '<div class="vazio">Nenhum acesso registrado.</div>' : ''));
+    $('#maisLotes').hidden = data.length < 50; return;
+  }
+  const { data, error } = await sb.from('valoriza_lotes').select('*').order('id', { ascending: false }).range(ini, ini + 49);
+  if (error){ box.innerHTML = `<div class="vazio">${esc(msgErro(error))}</div>`; return; }
+  if (reinicia) box.innerHTML = '';
+  if (!data.length && reinicia) box.innerHTML = '<div class="vazio">Nenhuma alteração registrada.</div>';
+  box.insertAdjacentHTML('beforeend', data.map(l => {
+    const [rot, cor] = ROT_TIPO[l.tipo] || [l.tipo, ''];
+    const chips = [l.novos && pl(l.novos, 'novo', 'novos'), l.alterados && pl(l.alterados, 'alterado', 'alterados'), l.removidos && pl(l.removidos, 'removido', 'removidos'), l.tipo === 'importacao' && `${nf.format(l.iguais)} sem alteração`].filter(Boolean);
+    return `<article class="lote${l.revertido_por ? ' desfeito' : ''}" data-lote="${l.id}">
+      <div class="lote-cab"><span class="selo ${cor}">${rot}</span><span class="quando">${quando(l.quando)} · ${esc(l.usuario)}</span>
+        ${l.revertido_por ? `<span class="selo">desfeito no lote ${l.revertido_por}</span>` : ''}${l.reverte ? `<span class="selo">desfaz o lote ${l.reverte}</span>` : ''}<span class="id">lote ${l.id}</span></div>
+      <p>${esc(l.descricao)}</p>
+      ${chips.length ? `<div class="lote-cab">${chips.map(c => `<span class="selo">${c}</span>`).join('')}</div>` : ''}
+      <div class="lote-acoes">
+        <button class="bt" type="button" data-acao="ver">Ver detalhes</button>
+        ${l.arquivo_sha256 ? `<button class="bt" type="button" data-acao="baixar" data-sha="${l.arquivo_sha256}" data-nome="${esc(l.arquivo_nome || 'planilha.xlsx')}">Baixar a planilha enviada</button>` : ''}
+        ${l.revertido_por ? '' : `<button class="bt" type="button" data-acao="desfazer">${l.tipo === 'reversao' ? 'Refazer (desfazer a reversão)' : 'Desfazer'}</button>`}
+      </div>
+      <ul class="eventos" hidden></ul>
+    </article>`;
+  }).join(''));
+  $('#maisLotes').hidden = data.length < 50;
+}
+$('#fHist').addEventListener('change', () => carregarLotes(true));
+$('#maisLotes').addEventListener('click', () => { E.lotesPag++; carregarLotes(false); });
+$('#listaLotes').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-acao]'); if (!b) return;
+  const art = b.closest('[data-lote]'), lote = Number(art.dataset.lote);
+  if (b.dataset.acao === 'desfazer') return desfazer(lote);
+  if (b.dataset.acao === 'baixar'){
+    const { data, error } = await sb.storage.from('caged').createSignedUrl(`valoriza/${b.dataset.sha}.xlsx`, 120, { download: b.dataset.nome });
+    if (error) return avisar('Arquivo indisponível', msgErro(error));
+    const a = document.createElement('a'); a.href = data.signedUrl; a.download = b.dataset.nome; document.body.appendChild(a); a.click(); a.remove(); return;
+  }
+  if (b.dataset.acao === 'ver'){
+    const ul = art.querySelector('.eventos');
+    if (!ul.hidden){ ul.hidden = true; b.textContent = 'Ver detalhes'; return; }
+    ul.hidden = false; b.textContent = 'Ocultar detalhes'; ul.innerHTML = '<li><span></span><span>Carregando…</span></li>';
+    const { data, error } = await sb.from('historico').select('id,quando,descricao,acao').eq('lote', lote).order('id').limit(2000);
+    if (error){ ul.innerHTML = `<li><span></span><span>${esc(msgErro(error))}</span></li>`; return; }
+    const evs = data.filter(x => x.acao !== 'importou' && x.acao !== 'reverteu');
+    ul.innerHTML = evs.length ? evs.map(x => `<li><time>${quando(x.quando)}</time><span>${esc(x.descricao)}</span></li>`).join('') : '<li><span></span><span>Nenhum processo mudou neste lote.</span></li>';
+  }
+});
+
+/* ---------------- início ---------------- */
+$('#listaUFs').innerHTML = UFS.map(u => `<option value="${u}">`).join('');
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await entrar(false); else telaLogin();
+})();
+</script>
+</body>
+</html>
